@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIG AIDLC — Knowledge Base Platform Architecture</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --aig-navy: #002B5C;
+    --aig-blue: #0057A8;
+    --aig-light-blue: #E8F0F9;
+    --aig-gold: #C8973A;
+    --aig-green: #2E7D32;
+    --aig-orange: #E65100;
+    --aig-purple: #6A1B9A;
+    --aig-teal: #00695C;
+    --bg: #F4F6FA;
+    --card: #FFFFFF;
+    --border: #D0D9E8;
+    --text: #1A1A2E;
+    --text-muted: #555;
+    --tag-bg: #E3EBF6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--aig-navy);
+    color: #fff;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.35);
+  }
+  .logo {
+    background: #fff;
+    color: var(--aig-navy);
+    font-weight: 900;
+    font-size: 18px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+  header h1 { font-size: 17px; font-weight: 500; opacity: .92; }
+  header .badge {
+    margin-left: auto;
+    background: var(--aig-gold);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  /* ── Nav tabs ── */
+  nav {
+    background: var(--aig-navy);
+    border-top: 1px solid rgba(255,255,255,.12);
+    display: flex;
+    padding: 0 40px;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  nav a {
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  nav a:hover, nav a.active {
+    color: #fff;
+    border-bottom-color: var(--aig-gold);
+  }
+
+  /* ── Main layout ── */
+  main { max-width: 1400px; margin: 0 auto; padding: 36px 40px 80px; }
+
+  /* ── Section headers ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 48px 0 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-header:first-child { margin-top: 0; }
+  .section-num {
+    background: var(--aig-blue);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 22px; font-weight: 700; color: var(--aig-navy); }
+  .section-header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--aig-navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h3 .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  /* ── Architecture overview grid ── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 900px) { .arch-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .layer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    border-top: 4px solid;
+  }
+  .layer-card.ui    { border-top-color: #0057A8; }
+  .layer-card.api   { border-top-color: #2E7D32; }
+  .layer-card.plugin { border-top-color: #E65100; }
+  .layer-card.mcp   { border-top-color: #6A1B9A; }
+
+  .layer-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .layer-card.ui .layer-title    { color: #0057A8; }
+  .layer-card.api .layer-title   { color: #2E7D32; }
+  .layer-card.plugin .layer-title { color: #E65100; }
+  .layer-card.mcp .layer-title   { color: #6A1B9A; }
+
+  .layer-name { font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--aig-navy); }
+  .layer-tech { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+  .layer-items { list-style: none; }
+  .layer-items li {
+    font-size: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: var(--text);
+    display: flex;
+    gap: 6px;
+  }
+  .layer-items li:last-child { border-bottom: none; }
+  .layer-items li::before { content: '→'; color: var(--text-muted); flex-shrink: 0; }
+
+  /* ── Mermaid diagrams ── */
+  .diagram-wrapper {
+    background: #FAFBFD;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    overflow-x: auto;
+    margin-bottom: 24px;
+  }
+  .mermaid { min-width: 600px; }
+
+  /* ── Step list ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    background: var(--aig-light-blue);
+    border-radius: 8px;
+    border-left: 3px solid var(--aig-blue);
+  }
+  .step-num {
+    background: var(--aig-blue);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-text { font-size: 12.5px; color: var(--text); }
+  .step-text strong { color: var(--aig-navy); }
+
+  /* Color variants for steps */
+  .step.orange { background: #FFF3E0; border-left-color: var(--aig-orange); }
+  .step.orange .step-num { background: var(--aig-orange); }
+  .step.green { background: #E8F5E9; border-left-color: var(--aig-green); }
+  .step.green .step-num { background: var(--aig-green); }
+  .step.purple { background: #F3E5F5; border-left-color: var(--aig-purple); }
+  .step.purple .step-num { background: var(--aig-purple); }
+
+  /* ── Package tables ── */
+  .pkg-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 800px) { .pkg-grid { grid-template-columns: 1fr; } }
+
+  .pkg-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .pkg-header {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pkg-header.ui     { background: #0057A8; }
+  .pkg-header.api    { background: #2E7D32; }
+  .pkg-header.plugin { background: #E65100; }
+  .pkg-header.mcp    { background: #6A1B9A; }
+
+  .pkg-table { width: 100%; border-collapse: collapse; }
+  .pkg-table th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: #FAFBFD;
+  }
+  .pkg-table td {
+    padding: 9px 16px;
+    font-size: 12.5px;
+    border-bottom: 1px solid #F0F0F0;
+    vertical-align: top;
+  }
+  .pkg-table tr:last-child td { border-bottom: none; }
+  .pkg-name { font-family: 'Courier New', monospace; font-weight: 700; color: var(--aig-navy); }
+  .pkg-version { color: var(--text-muted); font-size: 11.5px; }
+  .pkg-role { color: var(--text); font-size: 12px; }
+  .pkg-critical {
+    display: inline-block;
+    background: #FFEBEE;
+    color: #C62828;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+    text-transform: uppercase;
+  }
+
+  /* ── Callout box ── */
+  .callout {
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .callout.info { background: #E3F2FD; border-left: 4px solid #1565C0; color: #0D47A1; }
+  .callout.warn { background: #FFF8E1; border-left: 4px solid #F9A825; color: #6D4C00; }
+  .callout.ok   { background: #E8F5E9; border-left: 4px solid #388E3C; color: #1B5E20; }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Data flow connectors ── */
+  .flow-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  /* ── Responsive tweaks ── */
+  @media (max-width: 700px) {
+    main { padding: 20px 16px 60px; }
+    header { padding: 0 16px; }
+    nav { padding: 0 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     HEADER
+════════════════════════════════════════ -->
+<header>
+  <span class="logo">AIG</span>
+  <h1>AIDLC Platform — Knowledge Base Architecture Guide</h1>
+  <span class="badge">Internal</span>
+</header>
+
+<!-- ════════════════════════════════════════
+     NAV
+════════════════════════════════════════ -->
+<nav>
+  <a href="#overview" class="active">① Overview</a>
+  <a href="#embedding">② Embedding Pipeline</a>
+  <a href="#graph">③ Graph Creation</a>
+  <a href="#chat">④ Chat / RAG</a>
+  <a href="#packages">⑤ Critical Packages</a>
+</nav>
+
+<main>
+
+<!-- ════════════════════════════════════════
+     SECTION 1 — OVERVIEW
+════════════════════════════════════════ -->
+<div id="overview">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div>
+      <h2>System Overview — 4-Layer Architecture</h2>
+      <p>How the UI, API, Plugin Engine, and MCP Tools compose into a complete Knowledge Base platform</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>
+      The AIDLC Knowledge Base platform is built across <strong>4 separate repositories</strong>, each owning a distinct concern.
+      The <strong>Plugin</strong> runs <em>offline</em> to build the KB artifact bundle (graph + cards + evidence).
+      The <strong>MCP Tools</strong> load that bundle into Postgres + embed chunks via Bedrock.
+      The <strong>API</strong> serves the data at runtime. The <strong>UI</strong> renders it.
+    </div>
+  </div>
+
+  <div class="arch-grid">
+    <div class="layer-card ui">
+      <div class="layer-title">Layer 1 · UI</div>
+      <div class="layer-name">Angular 18 SPA</div>
+      <div class="layer-tech">D3 v7 · ngx-markdown · Axis UI · Okta</div>
+      <ul class="layer-items">
+        <li>Knowledge Graph (D3 Layers + Explore)</li>
+        <li>Chat / KB Agent (SSE streaming)</li>
+        <li>KB Versions & Coverage dashboard</li>
+        <li>SDLC Workspace pipeline views</li>
+        <li>Traceability RTM graph</li>
+      </ul>
+    </div>
+
+    <div class="layer-card api">
+      <div class="layer-title">Layer 2 · API</div>
+      <div class="layer-name">FastAPI Backend</div>
+      <div class="layer-tech">Python · LangGraph · NetworkX · psycopg3</div>
+      <ul class="layer-items">
+        <li>Chat Q&A + SSE streaming (/fe/query)</li>
+        <li>Graph explorer (/re/graph/*)</li>
+        <li>SDLC artifact generation (/ws/*)</li>
+        <li>Bedrock Titan embedding (query-time)</li>
+        <li>Okta JWT auth + Entitlement middleware</li>
+      </ul>
+    </div>
+
+    <div class="layer-card plugin">
+      <div class="layer-title">Layer 3 · Plugin (OFFLINE)</div>
+      <div class="layer-name">KB Agent Engine</div>
+      <div class="layer-tech">Python stdlib · Anthropic API · Claude Vision</div>
+      <ul class="layer-items">
+        <li>8-stage ingestion pipeline (PDF/DOCX/XLSX/Code/Email/Images)</li>
+        <li>LLM extraction → graph.json + cards.jsonl</li>
+        <li>Code lane parser (Java/TS/Python/SQL/COBOL)</li>
+        <li>G1–G10 integrity gates (re_anchor, check_kb, etc.)</li>
+        <li>NO embeddings — pure markdown file retrieval</li>
+      </ul>
+    </div>
+
+    <div class="layer-card mcp">
+      <div class="layer-title">Layer 4 · MCP Tools</div>
+      <div class="layer-name">FastMCP Server</div>
+      <div class="layer-tech">Python · FastMCP · boto3 · psycopg3</div>
+      <ul class="layer-items">
+        <li>12 MCP tools (5 retrieval + 7 indexer)</li>
+        <li>kb_load: S3 → Postgres (7 tables)</li>
+        <li>kb_embed: Bedrock Titan v2 → pgvector</li>
+        <li>kb_promote: STAGING → ACTIVE</li>
+        <li>graph_neighbors: graph traversal proxy</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- High-level architecture diagram -->
+  <div class="card">
+    <h3><span class="icon" style="background:#E3EBF6">🏗</span> End-to-End Data Flow Overview</h3>
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+graph LR
+    subgraph OFFLINE["⚙️ OFFLINE — KB Build (Plugin Engine)"]
+      direction TB
+      CORPUS["📁 Corpus Documents\nPDF · DOCX · XLSX · Code\nImages · Email · Tracker"]
+      PLUGIN["🔧 kb-agent-engine\n8-Stage Pipeline\n(Claude claude-sonnet-4-6)"]
+      BUNDLE["📦 KB Bundle (S3)\ngraph.json · cards.jsonl\nevidence-map.jsonl"]
+      CORPUS --> PLUGIN --> BUNDLE
+    end
+
+    subgraph LOAD["📥 KB Load & Embed (MCP Tools)"]
+      direction TB
+      MCP["🛠 MCP Tools Server\n(FastMCP · psycopg3 · boto3)"]
+      BEDROCK_E["☁️ AWS Bedrock\nTitan Text Embeddings v2\n1024-dim"]
+      PG["🐘 PostgreSQL + pgvector\nkb_nodes · kb_edges · kb_chunks\nkb_cards · kb_sources · kb_evidence"]
+      MCP -->|kb_embed| BEDROCK_E
+      MCP -->|kb_load| PG
+      BEDROCK_E --> PG
+    end
+
+    subgraph RUNTIME["🚀 RUNTIME (API + UI)"]
+      direction TB
+      API["⚡ FastAPI Backend\n(LangGraph · NetworkX · psycopg3)"]
+      BEDROCK_Q["☁️ AWS Bedrock\nClaude LLM (synthesis)\nTitan (query embed)"]
+      NX["🔗 NetworkX\nIn-memory Graph\nLRU cached per gear"]
+      UI["🖥 Angular 18 UI\n(D3 · ngx-markdown · Axis)"]
+      API --> BEDROCK_Q
+      API --> NX
+      PG --> API
+      API --> UI
+    end
+
+    BUNDLE --> MCP
+
+    style OFFLINE fill:#FFF3E0,stroke:#E65100,color:#000
+    style LOAD fill:#F3E5F5,stroke:#6A1B9A,color:#000
+    style RUNTIME fill:#E8F5E9,stroke:#2E7D32,color:#000
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SECTION 2 — EMBEDDING PIPELINE
+════════════════════════════════════════ -->
+<div id="embedding">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div>
+      <h2>Document Ingestion & Embedding Pipeline</h2>
+      <p>From raw enterprise documents → chunked pgvector embeddings in Postgres</p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠</span>
+    <div>
+      <strong>Two distinct phases:</strong> (A) The <strong>Plugin Engine</strong> builds structured KB artifacts from raw documents
+      using Claude LLM — no embeddings at this stage. (B) The <strong>MCP Tools Server</strong> then loads those artifacts into
+      Postgres and embeds text chunks using <strong>AWS Bedrock Titan v2</strong>.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon" style="background:#FFF3E0">📥</span> Phase A — Plugin Pipeline (8 Stages, Offline)</h3>
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Admin as 👤 Admin
+    participant Manifest as hash_manifest.sh<br/>(Stage 0)
+    participant Ingest as extract_doc.sh<br/>+ ingest_*.py<br/>(Stage 1)
+    participant Extract as kb-local-extractor<br/>Claude claude-sonnet-4-6<br/>(Stage 2)
+    participant CodeLane as extract_code_lane.py<br/>+ parse_java/js.py<br/>(Stage 3)
+    participant Vision as ocr_vision.py<br/>Claude Vision<br/>(Stage 4)
+    participant Synth as kb-synthesis-ontology<br/>Claude claude-sonnet-4-6<br/>(Stage 5)
+    participant Backfill as backfill_graph_nodes<br/>backfill_graph_edges<br/>(Stage 6)
+    participant Index as build_index.py<br/>build_registry.py<br/>(Stage 7)
+    participant Gates as gates.py<br/>re_anchor.py G1-G10<br/>(Stage 8)
+    participant S3 as ☁️ S3
+
+    Admin->>Manifest: trigger /kb-build skill
+    Manifest->>Manifest: SHA-256 hash all input files → _manifest.json
+    Note over Manifest: Incremental: detect changed files only
+
+    Manifest->>Ingest: process each document
+    Ingest->>Ingest: PDF→pdftotext, DOCX→libreoffice,<br/>XLSX→xmllint, EML→ingest_email.py
+    Ingest-->>Extract: kb/normalized/**/*.md (YAML frontmatter + content)
+
+    Extract->>Extract: Per-file LLM pass (Claude claude-sonnet-4-6)<br/>Emit: ontology triples + evidence entries<br/>Rule: ALL snippets must be VERBATIM
+    Extract-->>CodeLane: normalized docs ready
+
+    CodeLane->>CodeLane: tree-sitter AST (Java) + regex (TS)<br/>Mint CMP-*/API-* nodes<br/>Edges: CALLS/IMPLEMENTS/DEPENDS_ON/READS/WRITES
+
+    Vision->>Vision: Claude Vision API for PNG/JPG screenshots<br/>Output: structured YAML → normalized/vision_*.md
+
+    CodeLane-->>Synth: per-file ontology files + code facts
+    Vision-->>Synth: vision extractions
+
+    Synth->>Synth: Cross-file merge pass (Claude claude-sonnet-4-6)<br/>Output: graph.json (nodes+edges)<br/>cards.jsonl · sources.jsonl · evidence-map.jsonl<br/>workflows · sequences · state-machines
+
+    Synth-->>Backfill: graph.json + cards.jsonl
+
+    Backfill->>Backfill: Mint Screen/Term nodes with no graph node<br/>Reconnect orphan nodes:<br/>1. CITATION strategy<br/>2. ENDPOINT strategy<br/>3. NAME strategy
+
+    Backfill-->>Index: complete graph
+
+    Index->>Index: build _id-registry.md (canonical IDs)<br/>build INDEX.md (14 topic sections)
+
+    Index-->>Gates: all artifacts
+
+    Gates->>Gates: G1-G10 integrity gates<br/>re_anchor.py: VERIFIED/NOT_VERBATIM/FABRICATED<br/>check_kb.py · check_graph.py · check_fidelity.sh
+
+    Gates-->>S3: publish kb/** bundle (pass all gates)
+    S3-->>Admin: ✅ Bundle URI returned
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon" style="background:#F3E5F5">⚡</span> Phase B — MCP Tools: Load & Embed into Postgres</h3>
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Operator as 👤 Operator<br/>(CI / Plugin CLI)
+    participant MCP as 🛠 MCP Tools Server<br/>(FastMCP · Port 8082)
+    participant S3 as ☁️ AWS S3
+    participant PG as 🐘 Postgres + pgvector<br/>(RDS · sdlcaiassist)
+    participant Bedrock as ☁️ AWS Bedrock<br/>Titan Text Embeddings v2
+
+    Operator->>MCP: kb_register(org_id, gear_id, s3_uri)
+    MCP->>PG: INSERT kb_versions (status=STAGING)<br/>auto-generate version string {gear_id}-{lob}-{timestamp}
+    PG-->>MCP: {kb_version, registered_at}
+    MCP-->>Operator: {kb_version, status: STAGING}
+
+    Operator->>MCP: kb_load(org_id, gear_id, kb_version, s3_uri)
+    MCP->>S3: selective download<br/>knowledge/ · evidence/ · manifest.json · _build-report<br/>(skip normalized/ → 60-80% smaller download)
+    S3-->>MCP: bundle files
+
+    MCP->>MCP: Parse 6 file types:<br/>• _build-report.json<br/>• knowledge/graph.json → nodes + edges<br/>• records/cards.jsonl<br/>• records/sources.jsonl<br/>• records/assertions.jsonl<br/>• evidence/evidence-map.jsonl
+
+    MCP->>PG: UPSERT 7 tables atomically<br/>kb_nodes · kb_edges · kb_cards<br/>kb_sources · kb_chunks (status=PENDING)<br/>kb_evidence · kb_versions
+    PG-->>MCP: {loaded_cards, loaded_nodes, loaded_edges, loaded_chunks}
+    MCP-->>Operator: load summary
+
+    Operator->>MCP: kb_embed(org_id, gear_id, kb_version, batch_size=50)
+    loop For each PENDING chunk in kb_chunks
+      MCP->>MCP: Chunk text already split at load time<br/>512 words/chunk · 64-word overlap<br/>(pure word-based sliding window)
+      MCP->>Bedrock: invoke_model(amazon.titan-embed-text-v2:0)<br/>{"inputText": chunk_text}
+      Bedrock-->>MCP: float32[1024] embedding vector
+      MCP->>PG: UPDATE kb_chunks SET<br/>embedding = vector(1024) → pgvector column<br/>bm25_text = to_tsvector(chunk_text)<br/>embed_status = EMBEDDED
+    end
+    MCP-->>Operator: {total, embedded, failed, elapsed_s}
+
+    Operator->>MCP: kb_promote(org_id, gear_id, kb_version, signed_off_by)
+    MCP->>PG: BEGIN TRANSACTION<br/>UPDATE old ACTIVE → SUPERSEDED<br/>UPDATE this version → ACTIVE<br/>SET signed_off_at, signed_off_by<br/>COMMIT
+    PG-->>MCP: success
+    MCP-->>Operator: ✅ {kb_version, status: ACTIVE}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon" style="background:#E8F5E9">🔑</span> Chunking & Embedding — Key Parameters</h3>
+    <div class="steps">
+      <div class="step orange">
+        <div class="step-num">📐</div>
+        <div class="step-text"><strong>Chunk Size:</strong> 512 words per chunk with 64-word sliding overlap. Pure word-count split (no sentence boundary detection).</div>
+      </div>
+      <div class="step orange">
+        <div class="step-num">🤖</div>
+        <div class="step-text"><strong>Embedding Model:</strong> <code>amazon.titan-embed-text-v2:0</code> via AWS Bedrock <code>invoke_model</code>. Dimension: <strong>1024</strong>.</div>
+      </div>
+      <div class="step orange">
+        <div class="step-num">🏗</div>
+        <div class="step-text"><strong>Vector Store:</strong> pgvector extension on PostgreSQL (RDS). Column: <code>kb_chunks.embedding vector(1024)</code>, metric: cosine similarity.</div>
+      </div>
+      <div class="step orange">
+        <div class="step-num">📝</div>
+        <div class="step-text"><strong>BM25 index:</strong> <code>kb_chunks.bm25_text tsvector</code> — hybrid retrieval (dense vector + sparse BM25) at query time.</div>
+      </div>
+      <div class="step orange">
+        <div class="step-num">🔄</div>
+        <div class="step-text"><strong>Resumable:</strong> <code>kb_embed</code> skips rows with <code>embed_status=EMBEDDED</code>. Retries <code>FAILED_RETRYABLE</code> when <code>retry_failed=True</code>.</div>
+      </div>
+      <div class="step orange">
+        <div class="step-num">🛑</div>
+        <div class="step-text"><strong>Credential expiry:</strong> Returns <code>exit_code=2</code> on Bedrock credential expiry — safe to resume after re-auth.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SECTION 3 — GRAPH CREATION
+════════════════════════════════════════ -->
+<div id="graph">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div>
+      <h2>Knowledge Graph Construction & Rendering</h2>
+      <p>From document extraction → graph.json → Postgres → NetworkX → D3 visualization</p>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <span class="callout-icon">✓</span>
+    <div>
+      The graph uses <strong>no Neo4j in production</strong>. Nodes and edges are stored in Postgres (<code>kb_nodes</code> / <code>kb_edges</code>) and loaded into a
+      <strong>NetworkX DiGraph</strong> in-memory per gear (LRU-cached up to 20 gears). The UI renders via <strong>D3 v7</strong> with two modes: swimlane (Layers) and force-simulation (Explore).
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon" style="background:#FFF3E0">🏗</span> Graph Construction — Plugin to Postgres</h3>
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant Claude as 🤖 Claude claude-sonnet-4-6<br/>(kb-synthesis-ontology)
+    participant CodeLane as extract_code_lane.py<br/>+ parse_java.py / parse_js.py
+    participant Backfill as backfill_graph_nodes.py<br/>backfill_graph_edges.py
+    participant GateCheck as check_graph.py (G3b)<br/>check_registry.py (G4b)
+    participant S3 as ☁️ S3 (graph.json bundle)
+    participant MCP as 🛠 MCP kb_load
+    participant PG as 🐘 Postgres<br/>kb_nodes · kb_edges
+
+    Note over CodeLane: Stage 3 — Code Lane (Deterministic, NO LLM)
+    CodeLane->>CodeLane: Walk .java files → tree-sitter AST<br/>Mint CMP-JAUTO-JAVA-NNN nodes (class/interface)<br/>Mint API-JAUTO-NNN nodes (@GetMapping etc.)
+    CodeLane->>CodeLane: Walk .ts files → regex parse<br/>Mint CMP-JAUTO-TS-NNN nodes (class/component)
+    CodeLane->>CodeLane: Build L2 edges:<br/>CALLS (method invocation)<br/>IMPLEMENTS (controller→endpoint)<br/>DEPENDS_ON (import coupling)<br/>READS/WRITES (→ DB table by label match)
+    CodeLane->>CodeLane: _tag_entrypoints() → stamp metadata.entrypoint_kind
+
+    Note over Claude: Stage 5 — Synthesis Pass (LLM)
+    Claude->>Claude: Read all per-file ontology files<br/>Merge to canonical node set<br/>Deduplicate entities across documents
+
+    Claude->>Claude: Emit graph.json nodes:<br/>ENT (DB tables) · CMP (classes) · ApiOp (endpoints)<br/>Screen · Term · System · Integration<br/>Role · External · Workflow · BusinessRule<br/>FunctionalReq · Process · Sequence · StateMachine
+
+    Claude->>Claude: Emit graph.json edges:<br/>SCREEN_OF · GOVERNED_BY · TRIGGERS<br/>CALLS · FEEDS_INTO · VALIDATES<br/>REFERENCES · inherits · imports
+
+    Claude-->>Backfill: graph.json (may have orphan nodes)
+
+    Note over Backfill: Stage 6 — Backfill (Deterministic, NO LLM)
+    Backfill->>Backfill: Scan cards without graph nodes<br/>Mint Screen/Term nodes → assign IDs
+    Backfill->>Backfill: Find degree-0 (orphan) nodes
+    Backfill->>Backfill: Strategy 1 CITATION: explicit KB IDs in card prose
+    Backfill->>Backfill: Strategy 2 ENDPOINT: Integration A→B names → System nodes
+    Backfill->>Backfill: Strategy 3 NAME: System alias mentions → REFERENCES edges
+    Backfill-->>GateCheck: enriched graph.json
+
+    GateCheck->>GateCheck: G3b: isolated entities, family gaps,<br/>WF/SEQ count mismatch, dangling edges
+    GateCheck->>GateCheck: G4b: registry totals consistency,<br/>no placeholder tokens
+    GateCheck-->>S3: ✅ validated graph published in bundle
+
+    MCP->>S3: download knowledge/graph.json
+    MCP->>PG: UPSERT kb_nodes (id, kind, label, metadata, kb_version)<br/>UPSERT kb_edges (src, tgt, label, kb_version)<br/>ON CONFLICT DO UPDATE — never DELETE
+    PG-->>MCP: {loaded_nodes, loaded_edges}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon" style="background:#E3EBF6">🖥</span> Graph Serving & Rendering — API to D3 UI</h3>
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant UI as 🖥 Angular KbGraphComponent<br/>(D3 v7)
+    participant GearSvc as GraphService<br/>(Angular)
+    participant API as ⚡ FastAPI<br/>/re/graph/*
+    participant GProvider as GraphProvider<br/>(NetworkX LRU cache)
+    participant PG as 🐘 Postgres<br/>kb_nodes · kb_edges
+
+    UI->>GearSvc: ngOnInit() → loadGraph()
+    GearSvc->>API: GET /re/graph?gear_id={id}
+    API->>GProvider: get_graph(gear_id, kb_version)
+
+    alt Cache miss (first load or version change)
+      GProvider->>PG: SELECT * FROM kb_nodes WHERE kb_version=$1
+      PG-->>GProvider: node rows (id, kind, label, metadata)
+      GProvider->>PG: SELECT * FROM kb_edges WHERE kb_version=$1
+      PG-->>GProvider: edge rows (src, tgt, label)
+      GProvider->>GProvider: Build NetworkX DiGraph<br/>nx.DiGraph() + add_nodes_from() + add_edges_from()
+      GProvider->>GProvider: Compute: kinds legend · layer bands · categories
+      Note over GProvider: LRU cache: max 20 gears · evict on version promote
+    else Cache hit
+      GProvider->>GProvider: return cached DiGraph instantly
+    end
+
+    GProvider-->>API: GraphView {nodes[], edges[], layers{}, kinds{}, categories[]}
+    API-->>GearSvc: JSON response (nodes: 10984, edges: 27494 for UW Credit)
+    GearSvc-->>UI: GraphView
+
+    UI->>UI: User toggles mode button
+
+    alt LAYERS mode (deterministic swimlane)
+      UI->>UI: graph-swimlane.ts: assign each node to AU/AUW lane band
+      UI->>UI: D3: render static grid — no force simulation<br/>Color by kind (ROLE=yellow, BR=blue, FR=teal, SCR=green...)<br/>Dashed amber = Gap node (referenced but not KB-grounded)<br/>Purple accent = Forward-synced from FE workspace
+    else EXPLORE mode (interactive force-graph)
+      UI->>UI: D3 forceSimulation() with<br/>forceLink · forceManyBody · forceCenter
+      UI->>UI: Enable drag/zoom/pan on SVG canvas
+    end
+
+    UI->>UI: User clicks a node
+    UI->>API: GET /re/graph/node/{node_id}?gear_id={id}
+    API->>PG: fetch card body + evidence + adjacency list
+    PG-->>API: 3-tier drill data
+    API-->>UI: node detail payload
+    UI->>UI: Open 3-tier drill drawer<br/>(card + evidence + adjacency)
+
+    UI->>UI: User types in search box
+    UI->>API: GET /re/graph/seeds?q={text}&gear_id={id}
+    API->>GProvider: find_seeds(query, nodes, top=8)<br/>lexical token overlap scoring
+    API-->>UI: matching nodes highlighted
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon" style="background:#E8F5E9">📊</span> Node Types & Edge Types Reference</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div>
+        <table class="pkg-table" style="width:100%;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+          <tr style="background:#FAFBFD"><th style="padding:10px 14px">Node Kind</th><th style="padding:10px 14px">ID Pattern</th><th style="padding:10px 14px">Source</th></tr>
+          <tr><td style="padding:8px 14px"><code>ENT</code></td><td style="padding:8px 14px;font-size:11px"><code>ENT-JAUTO-DB-NNN</code></td><td style="padding:8px 14px;font-size:11px">DB tables / domain entities</td></tr>
+          <tr><td style="padding:8px 14px"><code>CMP</code></td><td style="padding:8px 14px;font-size:11px"><code>CMP-JAUTO-JAVA-NNN</code></td><td style="padding:8px 14px;font-size:11px">Java/TS classes, functions</td></tr>
+          <tr><td style="padding:8px 14px"><code>ApiOp</code></td><td style="padding:8px 14px;font-size:11px"><code>API-JAUTO-NNN</code></td><td style="padding:8px 14px;font-size:11px">HTTP endpoints (@Mapping)</td></tr>
+          <tr><td style="padding:8px 14px"><code>Screen</code></td><td style="padding:8px 14px;font-size:11px"><code>SCR-JAUTO-AU-NB-NNN</code></td><td style="padding:8px 14px;font-size:11px">UI screens (Claude Vision)</td></tr>
+          <tr><td style="padding:8px 14px"><code>BusinessRule</code></td><td style="padding:8px 14px;font-size:11px"><code>BR-JAUTO-NNN</code></td><td style="padding:8px 14px;font-size:11px">Business rules</td></tr>
+          <tr><td style="padding:8px 14px"><code>FunctionalReq</code></td><td style="padding:8px 14px;font-size:11px"><code>FR-JAUTO-NNN</code></td><td style="padding:8px 14px;font-size:11px">Functional requirements</td></tr>
+          <tr><td style="padding:8px 14px"><code>System</code></td><td style="padding:8px 14px;font-size:11px"><code>SYS-JAUTO-NNN</code></td><td style="padding:8px 14px;font-size:11px">External / platform systems</td></tr>
+          <tr><td style="padding:8px 14px"><code>Workflow</code></td><td style="padding:8px 14px;font-size:11px"><code>WF-JAUTO-NNN</code></td><td style="padding:8px 14px;font-size:11px">Business workflows</td></tr>
+          <tr><td style="padding:8px 14px"><code>Role</code></td><td style="padding:8px 14px;font-size:11px"><code>ROLE-UWCR-*</code></td><td style="padding:8px 14px;font-size:11px">Actor roles</td></tr>
+          <tr><td style="padding:8px 14px"><code>Integration</code></td><td style="padding:8px 14px;font-size:11px"><code>INT-JAUTO-NNN</code></td><td style="padding:8px 14px;font-size:11px">System integrations / APIs</td></tr>
+        </table>
+      </div>
+      <div>
+        <table class="pkg-table" style="width:100%;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+          <tr style="background:#FAFBFD"><th style="padding:10px 14px">Edge Label</th><th style="padding:10px 14px">Meaning</th></tr>
+          <tr><td style="padding:8px 14px"><code>CALLS</code></td><td style="padding:8px 14px;font-size:11px">Method/function invocation in code</td></tr>
+          <tr><td style="padding:8px 14px"><code>IMPLEMENTS</code></td><td style="padding:8px 14px;font-size:11px">Controller class → Spring endpoint</td></tr>
+          <tr><td style="padding:8px 14px"><code>DEPENDS_ON</code></td><td style="padding:8px 14px;font-size:11px">Import coupling across files</td></tr>
+          <tr><td style="padding:8px 14px"><code>READS / WRITES</code></td><td style="padding:8px 14px;font-size:11px">Component → DB table (label match)</td></tr>
+          <tr><td style="padding:8px 14px"><code>SCREEN_OF</code></td><td style="padding:8px 14px;font-size:11px">Screen → workflow or system</td></tr>
+          <tr><td style="padding:8px 14px"><code>GOVERNED_BY</code></td><td style="padding:8px 14px;font-size:11px">Screen/entity → business rule</td></tr>
+          <tr><td style="padding:8px 14px"><code>FEEDS_INTO</code></td><td style="padding:8px 14px;font-size:11px">Integration/system → downstream</td></tr>
+          <tr><td style="padding:8px 14px"><code>TRIGGERS</code></td><td style="padding:8px 14px;font-size:11px">Workflow step triggers another</td></tr>
+          <tr><td style="padding:8px 14px"><code>VALIDATES</code></td><td style="padding:8px 14px;font-size:11px">Rule validates entity/field</td></tr>
+          <tr><td style="padding:8px 14px"><code>REFERENCES</code></td><td style="padding:8px 14px;font-size:11px">Generic cross-reference</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SECTION 4 — CHAT / RAG
+════════════════════════════════════════ -->
+<div id="chat">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div>
+      <h2>Chat / RAG Query Pipeline</h2>
+      <p>From user question → hybrid retrieval (vector + BM25 + graph) → streamed LLM answer with citations</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>
+      Chat uses <strong>three retrieval signals in parallel</strong>: dense vector search (pgvector cosine), sparse BM25 (tsvector),
+      and graph neighbourhood context (NetworkX). Results are ranked, fed to a <strong>LangGraph ReAct agent</strong>,
+      which calls <strong>AWS Bedrock Claude</strong> to synthesize the grounded answer. The Angular UI receives it as
+      <strong>Server-Sent Events (SSE)</strong> and renders tokens word-by-word.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon" style="background:#E3F2FD">💬</span> Full Chat/RAG Sequence</h3>
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as 👤 User
+    participant Angular as 🖥 Angular ChatbotComponent<br/>(raw fetch + SSE)
+    participant Middleware as FastAPI Middleware Stack<br/>(CORSMiddleware → ApiKey → Entitlement → ActorContext)
+    participant ChatAPI as ⚡ /fe/query/stream<br/>(chat.py)
+    participant Embedder as embedder.py<br/>(Bedrock Titan v2)
+    participant PG as 🐘 Postgres + pgvector<br/>kb_chunks · kb_nodes · kb_edges
+    participant NX as 🔗 NetworkX Graph<br/>(graph_provider.py LRU cache)
+    participant LG as 🤖 LangGraph ReAct Agent
+    participant Claude as ☁️ AWS Bedrock<br/>Claude (ChatBedrockConverse)
+
+    User->>Angular: types question in textarea<br/>presses Enter / Send
+
+    Angular->>Middleware: fetch('POST /fe/query/stream')<br/>Headers: Authorization: Bearer {okta_jwt}<br/>X-Platform-Api-Key: {hmac_key}<br/>Body: {question, persona, top_k, workspace_id}
+
+    Note over Angular: Raw fetch() bypasses Angular interceptors<br/>Token read from localStorage('access_token')
+
+    Middleware->>Middleware: 1. CORS check<br/>2. HMAC validate X-Platform-Api-Key<br/>3. Okta JWT decode (RS256 / JWKS)<br/>4. Entitlement API → persona resolution<br/>5. Stamp ActorContext ContextVar
+
+    Middleware-->>ChatAPI: request + request.state.user (persona)
+
+    ChatAPI->>Angular: SSE: event: status, data: {stage: "understand"}
+
+    ChatAPI->>Embedder: embed(question_text)
+    Embedder->>Claude: invoke_model(amazon.titan-embed-text-v2:0)<br/>{"inputText": question}
+    Claude-->>Embedder: float32[1024] query vector
+    Embedder-->>ChatAPI: query_vector (or None on failure → fallback mode)
+
+    ChatAPI->>Angular: SSE: event: status, data: {stage: "retrieve"}
+
+    par Dense vector search
+      ChatAPI->>PG: SELECT kb_chunks.*, embedding <=> $query_vector AS score<br/>FROM kb_chunks WHERE kb_version=$active<br/>ORDER BY score LIMIT top_k
+      PG-->>ChatAPI: top-K semantically similar chunks
+    and BM25 lexical search
+      ChatAPI->>PG: SELECT kb_chunks.* FROM kb_chunks<br/>WHERE bm25_text @@ plainto_tsquery($question)<br/>AND kb_version=$active ORDER BY ts_rank DESC LIMIT top_k
+      PG-->>ChatAPI: BM25-matched chunks
+    end
+
+    ChatAPI->>ChatAPI: Merge + deduplicate dense + BM25 results<br/>Re-rank by combined score
+
+    ChatAPI->>Angular: SSE: event: status, data: {stage: "rank"}
+
+    ChatAPI->>NX: get_graph(gear_id) → cached NetworkX DiGraph
+    NX-->>ChatAPI: DiGraph (nodes + edges)
+    ChatAPI->>ChatAPI: graph_walk.find_seeds(question, nodes) → seed node IDs
+    ChatAPI->>ChatAPI: graph_walk.neighbors(seed_ids, edges) → adjacent context
+    ChatAPI->>ChatAPI: Combine: retrieved chunks + graph context + card bodies
+
+    ChatAPI->>Angular: SSE: event: status, data: {stage: "synthesize"}
+
+    ChatAPI->>LG: invoke ReAct agent with context bundle<br/>{question, retrieved_chunks, graph_context, persona, chat_history}
+
+    LG->>Claude: ChatBedrockConverse.stream()<br/>Model: resolved from MODEL_REGISTRY_JSON<br/>System: persona-specific prompt + cite-or-abstain instruction<br/>Context: KB chunks + graph context
+
+    loop Streaming tokens
+      Claude-->>LG: token / partial text
+      LG-->>ChatAPI: partial token
+      ChatAPI->>Angular: SSE: event: token, data: {text: "..."}
+      Angular->>Angular: append token to message bubble<br/>ChangeDetectorRef.detectChanges() per token
+    end
+
+    ChatAPI->>Angular: SSE: event: status, data: {stage: "ground"}
+
+    ChatAPI->>ChatAPI: Extract cited KB IDs from answer<br/>Validate each citation exists in retrieved chunks<br/>ABSTAIN if no coverage → "not covered by the corpus"
+
+    ChatAPI->>Angular: SSE: event: done, data: {citations: [{card_id, locus},...], answered: true}
+    Angular->>Angular: Render citations as chips below answer<br/>Show pipeline stage trace (collapsible)
+
+    opt Session persistence
+      Angular->>ChatAPI: POST /fe/sessions (if session_id not set)
+      ChatAPI->>PG: INSERT fe_sessions + fe_turns
+    end
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon" style="background:#E8F5E9">🔄</span> SSE Event Types & UI Rendering</h3>
+    <div class="steps">
+      <div class="step green">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>status</strong> — Pipeline stage updates: <code>understand → retrieve → rank → synthesize → ground</code>. Angular renders as a live collapsible step list.</div>
+      </div>
+      <div class="step green">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>token</strong> — Partial text from Claude. Angular appends to message bubble + calls <code>ChangeDetectorRef.detectChanges()</code> immediately (bypasses zone batching).</div>
+      </div>
+      <div class="step green">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>retract</strong> — Sent if Claude backtracks on a partial statement. UI removes the retracted text.</div>
+      </div>
+      <div class="step green">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>abstain</strong> — Sent when no KB coverage found. Angular shows "not covered by the corpus" UI state instead of hallucinated answer.</div>
+      </div>
+      <div class="step green">
+        <div class="step-num">5</div>
+        <div class="step-text"><strong>done</strong> — Final event with <code>{citations, answered, session_id}</code>. Angular renders KB card ID chips + source loci as citation footnotes.</div>
+      </div>
+      <div class="step green">
+        <div class="step-num">6</div>
+        <div class="step-text"><strong>cancelled / error</strong> — User calls <code>DELETE /fe/query/stop/{request_id}</code> or server error. Angular shows error state gracefully.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SECTION 5 — CRITICAL PACKAGES
+════════════════════════════════════════ -->
+<div id="packages">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div>
+      <h2>Critical Packages — All Layers</h2>
+      <p>Every dependency that is load-bearing for the three flows above, with exact versions</p>
+    </div>
+  </div>
+
+  <div class="pkg-grid">
+
+    <!-- UI -->
+    <div class="pkg-card">
+      <div class="pkg-header ui">🖥 UI Layer — Angular 18 SPA</div>
+      <table class="pkg-table">
+        <tr><th>Package</th><th>Version</th><th>Role</th></tr>
+        <tr>
+          <td><span class="pkg-name">@angular/core</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">18.2.x</span></td>
+          <td><span class="pkg-role">Angular framework — component model, DI, zones</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">d3</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">^7.9.0</span></td>
+          <td><span class="pkg-role">Knowledge Graph rendering (force simulation + SVG)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">ngx-markdown</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">^18.1.0</span></td>
+          <td><span class="pkg-role">Renders LLM chat answers + KB card bodies as Markdown</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">@okta/okta-auth-js</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">^6.5.1</span></td>
+          <td><span class="pkg-role">OIDC auth — JWT stored in localStorage for SSE fetch calls</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">axis-components</span></td>
+          <td><span class="pkg-version">^18.x</span></td>
+          <td><span class="pkg-role">AIG internal Axis UI component system (all standard UI elements)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">ngx-extended-pdf-viewer</span></td>
+          <td><span class="pkg-version">^20.5.2</span></td>
+          <td><span class="pkg-role">In-browser PDF viewing for source documents</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">dompurify</span></td>
+          <td><span class="pkg-version">^3.3.3</span></td>
+          <td><span class="pkg-role">HTML sanitization — LLM output safety before DOM injection</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">rxjs</span></td>
+          <td><span class="pkg-version">~7.8.0</span></td>
+          <td><span class="pkg-role">BehaviorSubject state streams, forkJoin for parallel fetches</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">ngx-echarts + echarts</span></td>
+          <td><span class="pkg-version">^18.0.0 / ^5.6.0</span></td>
+          <td><span class="pkg-role">Coverage charts + dashboard analytics</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">html2canvas + jspdf</span></td>
+          <td><span class="pkg-version">^1.4.1 / ^3.0.1</span></td>
+          <td><span class="pkg-role">Client-side PDF export of views</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- API -->
+    <div class="pkg-card">
+      <div class="pkg-header api">⚡ API Layer — FastAPI Backend</div>
+      <table class="pkg-table">
+        <tr><th>Package</th><th>Version</th><th>Role</th></tr>
+        <tr>
+          <td><span class="pkg-name">fastapi</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">0.115.6</span></td>
+          <td><span class="pkg-role">Web framework — all REST + SSE endpoints</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">langgraph</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">1.2.10</span></td>
+          <td><span class="pkg-role">ReAct agent orchestration for RAG + SDLC artifact generation</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">langchain-aws</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">1.7.0</span></td>
+          <td><span class="pkg-role">ChatBedrockConverse wrapper — Claude LLM calls via Bedrock</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">boto3</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">1.43.32</span></td>
+          <td><span class="pkg-role">AWS SDK — Bedrock invoke_model (Titan embedding) + S3</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">psycopg[binary]</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">>=3.2.10</span></td>
+          <td><span class="pkg-role">Async Postgres driver (psycopg3) — all KB reads at query time</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">psycopg-pool</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">3.2.4</span></td>
+          <td><span class="pkg-role">Async connection pool — per-gear pool registry (max 10 conns)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">pgvector</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">0.3.6</span></td>
+          <td><span class="pkg-role">pgvector type registration for psycopg3 — cosine similarity queries</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">networkx</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">3.4.2</span></td>
+          <td><span class="pkg-role">In-memory knowledge graph — graph_provider.py LRU cache per gear</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">PyJWT[crypto]</span></td>
+          <td><span class="pkg-version">2.10.1</span></td>
+          <td><span class="pkg-role">Okta JWT validation (RS256, JWKS) in EntitlementMiddleware</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">python-docx + pdfplumber</span></td>
+          <td><span class="pkg-version">1.1.2 / 0.11.4</span></td>
+          <td><span class="pkg-role">.docx export + PDF text extraction for workspace file uploads</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Plugin -->
+    <div class="pkg-card">
+      <div class="pkg-header plugin">🔧 Plugin — KB Agent Engine (Offline Build)</div>
+      <table class="pkg-table">
+        <tr><th>Package</th><th>Version</th><th>Role</th></tr>
+        <tr>
+          <td><span class="pkg-name">anthropic</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">latest</span></td>
+          <td><span class="pkg-role">Claude API client — Vision API in ocr_vision.py (model: claude-sonnet-4-6)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">tree_sitter</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">0.26.0</span></td>
+          <td><span class="pkg-role">AST parsing for Java code in parse_java.py (code lane)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">tree_sitter_java</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">0.23.5</span></td>
+          <td><span class="pkg-role">Java grammar for tree-sitter — CMP/API node extraction</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">presidio-analyzer</span></td>
+          <td><span class="pkg-version">2.2.364</span></td>
+          <td><span class="pkg-role">PII detection in pii_mask.py — fail-closed gate</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">presidio-anonymizer</span></td>
+          <td><span class="pkg-version">2.2.364</span></td>
+          <td><span class="pkg-role">PII masking/anonymization before storage</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">spacy</span></td>
+          <td><span class="pkg-version">3.8.15</span></td>
+          <td><span class="pkg-role">NER for PII detection — models: en_core_web_lg + ja_core_news_lg</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">SudachiPy + SudachiDict</span></td>
+          <td><span class="pkg-version">0.6.11 / 20260723</span></td>
+          <td><span class="pkg-role">Japanese tokenizer for spaCy NER (Japan Auto LOB)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">jsonschema</span></td>
+          <td><span class="pkg-version">latest</span></td>
+          <td><span class="pkg-role">Capability manifest validation in capabilities.py</span></td>
+        </tr>
+        <tr>
+          <td colspan="3" style="padding:10px 14px;font-size:11px;color:var(--text-muted);background:#FAFBFD">
+            ℹ Core engine (hash_manifest, graph_walk, re_anchor, build_index) uses <strong>Python stdlib only</strong> — json, re, pathlib, difflib, hashlib, subprocess, collections. No heavy dependencies.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- MCP -->
+    <div class="pkg-card">
+      <div class="pkg-header mcp">🛠 MCP Tools Server — FastMCP</div>
+      <table class="pkg-table">
+        <tr><th>Package</th><th>Version</th><th>Role</th></tr>
+        <tr>
+          <td><span class="pkg-name">mcp</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">>=1.26,&lt;2</span></td>
+          <td><span class="pkg-role">MCP SDK (FastMCP) — tool registration, stdio/http transport</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">boto3</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">>=1.34,&lt;2</span></td>
+          <td><span class="pkg-role">S3 download (kb_load) + Bedrock Titan embedding (kb_embed)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">psycopg[binary]</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">>=3.1,&lt;4</span></td>
+          <td><span class="pkg-role">Postgres driver — upsert 7 KB tables + pgvector writes</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">fastapi</span><span class="pkg-critical">critical</span></td>
+          <td><span class="pkg-version">>=0.115,&lt;1</span></td>
+          <td><span class="pkg-role">HTTP/SSE transport for MCP + gear management REST API</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">httpx</span></td>
+          <td><span class="pkg-version">>=0.28,&lt;1</span></td>
+          <td><span class="pkg-role">Async HTTP client to agents backend (kb_query proxy calls)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">pydantic + pydantic-settings</span></td>
+          <td><span class="pkg-version">>=2.9,&lt;3</span></td>
+          <td><span class="pkg-role">Tool parameter validation + settings from env / config.json</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">uvicorn[standard]</span></td>
+          <td><span class="pkg-version">>=0.34,&lt;1</span></td>
+          <td><span class="pkg-role">ASGI server for FastAPI HTTP transport (port 8082)</span></td>
+        </tr>
+        <tr>
+          <td><span class="pkg-name">tenacity</span></td>
+          <td><span class="pkg-version">>=8,&lt;10</span></td>
+          <td><span class="pkg-role">Retry logic for Vault credential resolution</span></td>
+        </tr>
+        <tr>
+          <td colspan="3" style="padding:10px 14px;font-size:11px;color:var(--text-muted);background:#FAFBFD">
+            ℹ <strong>12 MCP tools</strong> served: kb_query, kb_read, kb_card, kb_cards_search, graph_neighbors (retrieval) + kb_s3_config, kb_register, kb_load, kb_embed, kb_promote, kb_status, kb_export (indexer).
+          </td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Shared infrastructure summary -->
+  <div class="card" style="margin-top:24px">
+    <h3><span class="icon" style="background:#F3E5F5">☁️</span> Shared Infrastructure & Key Design Decisions</h3>
+    <div class="steps" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))">
+      <div class="step purple">
+        <div class="step-num">🐘</div>
+        <div class="step-text"><strong>PostgreSQL + pgvector (RDS)</strong> is the single source of truth for all KB data at runtime — 7 tables: kb_nodes, kb_edges, kb_cards, kb_chunks, kb_sources, kb_evidence, kb_versions. Schema isolated per gear (search_path).</div>
+      </div>
+      <div class="step purple">
+        <div class="step-num">☁️</div>
+        <div class="step-text"><strong>AWS Bedrock</strong> is used for two things only: (1) Titan Text Embeddings v2 for chunk indexing (MCP) and query embedding (API). (2) Claude via ChatBedrockConverse for LLM synthesis at query time. Model IDs never hardcoded — resolved from MODEL_REGISTRY_JSON.</div>
+      </div>
+      <div class="step purple">
+        <div class="step-num">🔐</div>
+        <div class="step-text"><strong>HashiCorp Vault</strong> holds all secrets — Postgres passwords, Bedrock keys, S3 role ARNs. Never in config files or environment variables directly. Vault app codes are per-gear (4 tenants: Japan Auto, Claims, Scup, UW Credit Risk).</div>
+      </div>
+      <div class="step purple">
+        <div class="step-num">🔗</div>
+        <div class="step-text"><strong>NetworkX (not Neo4j)</strong> for production graph. Neo4j config exists in registry but is deferred to v2. NetworkX DiGraph built on demand from Postgres, LRU-cached up to 20 gears. All graph queries are in-memory traversals.</div>
+      </div>
+      <div class="step purple">
+        <div class="step-num">🤖</div>
+        <div class="step-text"><strong>Cite-or-Abstain rule</strong> enforced at two layers: Plugin's re_anchor.py gate (G9v) rejects FABRICATED evidence at build time. API's chat endpoint abstains with "not covered by the corpus" if no KB coverage found at query time.</div>
+      </div>
+      <div class="step purple">
+        <div class="step-num">📦</div>
+        <div class="step-text"><strong>Multi-tenant via org/gear registry</strong> — 4 tenants share one RDS cluster but are isolated by Postgres schema (search_path). S3 buckets and prefixes are per-gear. MCP Tools registry.json maps org_id + gear_id to all config.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  AIG AIDLC Platform · Knowledge Base Architecture · Internal Reference Document · Author: Ranjith Gopalan
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#E8F0F9',
+      primaryTextColor: '#1A1A2E',
+      primaryBorderColor: '#0057A8',
+      lineColor: '#6B8DB5',
+      secondaryColor: '#F3E5F5',
+      tertiaryColor: '#E8F5E9',
+      noteBkgColor: '#FFF9C4',
+      noteTextColor: '#333',
+      actorBkg: '#002B5C',
+      actorTextColor: '#FFFFFF',
+      actorBorder: '#0057A8',
+      activationBkg: '#E3EBF6',
+      activationBorderColor: '#0057A8',
+      sequenceNumberColor: '#FFFFFF',
+      fontSize: '13px'
+    },
+    sequence: {
+      diagramMarginX: 20,
+      diagramMarginY: 10,
+      actorMargin: 40,
+      width: 180,
+      height: 60,
+      boxMargin: 10,
+      boxTextMargin: 5,
+      noteMargin: 10,
+      messageMargin: 30,
+      useMaxWidth: true
+    },
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true
+    }
+  });
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('nav a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('nav a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Highlight active nav on scroll
+  const sections = ['overview', 'embedding', 'graph', 'chat', 'packages'];
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        document.querySelectorAll('nav a').forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-100px 0px -60% 0px' });
+
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+</script>
+</body>
+</html>
