@@ -1,0 +1,21 @@
+{
+  "name": "AIDLC-kb",
+  "description": "Reverse-engineering knowledge-base builder: turns a corpus (RED, specs, schema dumps, source) into typed, cited knowledge cards (ENT/BR/FR/SCR/WF/CMP/API), a typed-edge graph (graph.json) and an evidence map, in the layout fe_core.kb.cards reads. Deterministic gate script validates ids, edges and evidence before the KB is used by downstream stages.",
+  "version": "0.1.0",
+  "author": {
+    "name": "AIG AI COE Tech Mod Team"
+  },
+  "keywords": [
+    "knowledge-base",
+    "reverse-engineering",
+    "cards",
+    "graph",
+    "evidence",
+    "grounding"
+  ],
+  "agents": [],
+  "skills": [
+    "./skills/kb-build",
+    "./skills/kb-check"
+  ]
+}
