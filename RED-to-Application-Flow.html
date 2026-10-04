@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIG CORE AIDLC PLATFORM — RED to Application Flow</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --surface: #f8f9fc;
+  --surface2: #f0f2f8;
+  --border: #dde1ee;
+  --accent: #1a5fd4;
+  --global: #1a6b3a;
+  --global-bg: #edf7f1;
+  --global-border: #52b778;
+  --mini: #1a4a7a;
+  --mini-bg: #eaf2fc;
+  --mini-border: #4a8ecb;
+  --arch: #8a4800;
+  --arch-bg: #fff4e8;
+  --arch-border: #d4861e;
+  --assembler: #1a6a5a;
+  --assembler-bg: #e8f7f4;
+  --assembler-border: #3abfb0;
+  --text: #1e2340;
+  --text-dim: #5c6480;
+  --text-bright: #0d1024;
+  --green: #1a7a43;
+  --orange: #b05c00;
+  --red: #c0302a;
+  --purple: #6b3faa;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-width: 1400px;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+/* ═══════════════ HEADER ═══════════════ */
+.page-header {
+  background: linear-gradient(135deg, #1a3a8f 0%, #1a1060 50%, #0d2a6a 100%);
+  padding: 26px 40px 22px;
+  color: white;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.page-header-left h1 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.page-header-left .subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.72);
+  margin-top: 5px;
+}
+
+.header-chips {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.header-chip {
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 20px;
+  padding: 3px 13px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════ LEGEND BAR ═══════════════ */
+.legend-bar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.legend-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.legend-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.legend-chip-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.ws-legend-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ws-legend-badge {
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1.5px solid;
+  white-space: nowrap;
+}
+
+/* ═══════════════ 3-COLUMN GRID ═══════════════ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 282px 1fr 262px;
+  align-items: start;
+  min-height: calc(100vh - 47px);
+}
+
+/* ═══════════════ LEFT COLUMN ═══════════════ */
+.col-left {
+  background: var(--surface);
+  border-right: 2px solid var(--border);
+  padding: 18px 14px 24px;
+  position: sticky;
+  top: 47px;
+  height: calc(100vh - 47px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.col-left::-webkit-scrollbar { width: 4px; }
+.col-left::-webkit-scrollbar-track { background: transparent; }
+.col-left::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.col-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-bright);
+  margin-bottom: 3px;
+}
+
+.col-section-subtitle {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+/* RED GROUPS */
+.red-group {
+  margin-bottom: 10px;
+}
+
+.red-group-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 3px 7px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  display: inline-block;
+  border: 1px solid transparent;
+}
+
+/* RED ITEM CARDS */
+.red-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 5px 7px;
+  border-radius: 5px;
+  border: 1px solid #e8eaf4;
+  border-left: 3px solid;
+  background: white;
+  margin-bottom: 3px;
+  cursor: default;
+  transition: all 0.22s ease;
+  position: relative;
+}
+
+.red-num {
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+
+.red-name {
+  flex: 1;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.hard-stop-badge {
+  font-size: 8.5px;
+  font-weight: 800;
+  background: var(--red);
+  color: white;
+  padding: 1px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+  align-self: center;
+}
+
+/* Hard-stop pulse */
+@keyframes hardstop-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(192,48,42,0.5); }
+  50%  { box-shadow: 0 0 0 5px rgba(192,48,42,0.12); }
+  100% { box-shadow: 0 0 0 0 rgba(192,48,42,0.0); }
+}
+
+.red-item.hard-stop {
+  animation: hardstop-pulse 2.2s ease-in-out infinite;
+}
+
+/* Hover/selection states */
+.red-item.highlighted {
+  background: #fff4e8 !important;
+  border-left-color: #d4861e !important;
+  box-shadow: 0 0 0 2px #d4861e !important;
+  transform: translateX(4px);
+  animation: none !important;
+}
+
+.red-item.dimmed {
+  opacity: 0.28;
+}
+
+/* ═══════════════ CENTER COLUMN ═══════════════ */
+.col-center {
+  padding: 22px 20px 40px;
+  background: var(--bg);
+}
+
+/* ─── WORKSPACE WRAPPER ─── */
+.workspace-section {
+  margin-bottom: 4px;
+}
+
+.workspace-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 8px 8px 0 0;
+  border: 2px solid;
+  border-bottom: none;
+}
+
+.ws-icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.ws-title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ws-desc {
+  font-size: 11px;
+  opacity: 0.72;
+  font-style: italic;
+}
+
+.ws-count {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  opacity: 0.8;
+}
+
+.workspace-body {
+  border: 2px solid;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* ─── AGENT CARD ─── */
+.agent-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 12px 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+  user-select: none;
+}
+
+.agent-card:hover {
+  box-shadow: 0 3px 14px rgba(0,0,0,0.09);
+  transform: translateY(-1px);
+  border-color: #c8cde0;
+}
+
+.agent-card.active {
+  box-shadow: 0 4px 20px rgba(26,95,212,0.18);
+  border-color: #90a8d8;
+}
+
+.agent-card.pinned {
+  border-color: #d4861e;
+  box-shadow: 0 4px 20px rgba(212,134,30,0.22);
+}
+
+.agent-card.pinned::after {
+  content: 'PINNED';
+  position: absolute;
+  top: 7px;
+  right: 10px;
+  font-size: 8px;
+  font-weight: 800;
+  color: #d4861e;
+  letter-spacing: 0.06em;
+  background: #fff4e8;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid #d4861e;
+}
+
+/* ─── AGENT CARD INTERNALS ─── */
+.agent-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.stage-badge {
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: white;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.agent-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-bright);
+  line-height: 1.25;
+}
+
+.agent-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.row-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Category number badges */
+.cat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+  line-height: 1;
+  cursor: help;
+  transition: transform 0.15s ease;
+}
+
+.cat-badge:hover {
+  transform: scale(1.15);
+}
+
+.inherited-badge {
+  font-size: 9.5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--surface2);
+  color: var(--text-dim);
+  font-weight: 600;
+  border: 1px solid var(--border);
+  font-style: italic;
+}
+
+/* Artifact badges */
+.artifact-badge {
+  font-size: 9.5px;
+  background: var(--surface2);
+  color: var(--text-dim);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'SF Mono', 'Fira Code', 'Monaco', Consolas, monospace;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+/* ─── FLOW ARROWS ─── */
+.flow-down-arrow {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 16px;
+  padding: 1px 0;
+  line-height: 1;
+}
+
+/* ─── WORKSPACE TRANSITIONS ─── */
+.workspace-transition {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  gap: 0;
+}
+
+.transition-line {
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(90deg,
+    var(--border) 0px, var(--border) 6px,
+    transparent 6px, transparent 12px);
+}
+
+.transition-label {
+  background: white;
+  padding: 4px 14px;
+  font-size: 10.5px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  white-space: nowrap;
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+/* ─── GATE INDICATORS ─── */
+.gate-row {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.gate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--global-bg);
+  border: 1.5px solid var(--global-border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--global);
+}
+
+.gate-icon {
+  font-size: 13px;
+}
+
+/* ─── FAN-OUT INDICATOR ─── */
+.fanout-box {
+  background: var(--mini-bg);
+  border: 1.5px dashed var(--mini-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.fanout-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--mini);
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.fanout-epics {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.epic-chip {
+  background: var(--mini);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.fanout-arrow-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.fanout-arrow-sym {
+  font-size: 18px;
+  color: var(--mini);
+  line-height: 1;
+}
+
+.fanout-arrow-text {
+  font-size: 9px;
+  color: var(--mini);
+  font-weight: 600;
+}
+
+.mini-ws-chip {
+  background: white;
+  border: 2px solid var(--mini-border);
+  color: var(--mini);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* concurrent label */
+.concurrent-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 0 6px;
+}
+
+.concurrent-pill {
+  background: var(--mini-bg);
+  border: 1px solid var(--mini-border);
+  color: var(--mini);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* ═══════════════ RIGHT COLUMN ═══════════════ */
+.col-right {
+  background: var(--surface);
+  border-left: 2px solid var(--border);
+  padding: 18px 14px 24px;
+  position: sticky;
+  top: 47px;
+  height: calc(100vh - 47px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.col-right::-webkit-scrollbar { width: 4px; }
+.col-right::-webkit-scrollbar-track { background: transparent; }
+.col-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* TIER CARDS */
+.tier-card {
+  border-radius: 7px;
+  padding: 11px 12px;
+  margin-bottom: 10px;
+  border: 1.5px solid;
+}
+
+.tier-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+
+.tier-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.tier-title {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.tier-items {
+  list-style: none;
+  margin-bottom: 7px;
+}
+
+.tier-items li {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 2px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  line-height: 1.35;
+}
+
+.tier-items li::before {
+  content: '·';
+  color: #b0b8cc;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tier-producer {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.6);
+  border-radius: 4px;
+  padding: 2px 7px;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+/* METRICS BOX */
+.metrics-box {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 11px 12px;
+  margin-top: 4px;
+}
+
+.metrics-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-dim);
+  margin-bottom: 9px;
+}
+
+.metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--surface2);
+}
+
+.metric-row:last-child { border-bottom: none; }
+
+.metric-label {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.metric-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════ TOOLTIP ═══════════════ */
+.agent-tooltip {
+  display: none;
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(13,16,36,0.92);
+  color: white;
+  padding: 5px 11px;
+  border-radius: 5px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 50;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.agent-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(13,16,36,0.92);
+}
+
+.agent-card:hover .agent-tooltip {
+  display: block;
+}
+
+.agent-card.pinned .agent-tooltip {
+  display: none; /* Hide tooltip when pinned — the PINNED badge shows already */
+}
+
+/* ═══════════════ SCROLLBAR GLOBAL ═══════════════ */
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════ -->
+<header class="page-header">
+  <div class="page-header-left">
+    <h1>AIG CORE AIDLC PLATFORM &mdash; UW Credit Risk</h1>
+    <div class="subtitle">RED Input &rarr; Agent Pipeline &rarr; Target Application &middot; Visual Flow Diagram</div>
+    <div class="header-chips">
+      <span class="header-chip">Version 2.0</span>
+      <span class="header-chip">2026-10-03</span>
+      <span class="header-chip">4 Workspaces &middot; 22 Stages &middot; 19 RED Categories</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     LEGEND BAR (sticky)
+═══════════════════════════════════════════ -->
+<div class="legend-bar">
+  <span class="legend-section-label">RED Groups:</span>
+  <div class="legend-chips">
+    <span class="legend-chip-item" style="color:#1a6b3a;background:#edf7f1;border-color:#52b778;">
+      <span class="legend-dot" style="background:#1a6b3a;"></span>A &mdash; Business Knowledge
+    </span>
+    <span class="legend-chip-item" style="color:#1a5fd4;background:#eaf2fc;border-color:#4a8ecb;">
+      <span class="legend-dot" style="background:#1a5fd4;"></span>B &mdash; UI &amp; Process
+    </span>
+    <span class="legend-chip-item" style="color:#6b3faa;background:#f4eeff;border-color:#a07dd4;">
+      <span class="legend-dot" style="background:#6b3faa;"></span>C &mdash; Services
+    </span>
+    <span class="legend-chip-item" style="color:#b05c00;background:#fff4e8;border-color:#d4861e;">
+      <span class="legend-dot" style="background:#b05c00;"></span>D &mdash; Database
+    </span>
+    <span class="legend-chip-item" style="color:#1a6a5a;background:#e8f7f4;border-color:#3abfb0;">
+      <span class="legend-dot" style="background:#1a6a5a;"></span>E &mdash; Integration &amp; Ops
+    </span>
+    <span class="legend-chip-item" style="color:#5c6480;background:#f0f2f8;border-color:#9097b0;">
+      <span class="legend-dot" style="background:#5c6480;"></span>F &mdash; Operations
+    </span>
+  </div>
+  <div class="legend-divider"></div>
+  <span class="legend-section-label">Workspaces:</span>
+  <div class="ws-legend-badges">
+    <span class="ws-legend-badge" style="background:var(--global-bg);color:var(--global);border-color:var(--global-border);">Global WS</span>
+    <span class="ws-legend-badge" style="background:var(--arch-bg);color:var(--arch);border-color:var(--arch-border);">Architecture WS</span>
+    <span class="ws-legend-badge" style="background:var(--mini-bg);color:var(--mini);border-color:var(--mini-border);">Mini WS</span>
+    <span class="ws-legend-badge" style="background:var(--assembler-bg);color:var(--assembler);border-color:var(--assembler-border);">Epic Assembler</span>
+  </div>
+  <div class="legend-divider"></div>
+  <div class="legend-divider"></div>
+  <span style="font-size:10px;color:var(--text-dim);font-style:italic;">Hover agent cards to highlight consumed RED &middot; Click to pin</span>
+  <div class="legend-divider"></div>
+  <span style="font-size:10px;font-weight:600;color:#1e2340;">RED reaches agents via:</span>
+  <span style="font-size:10px;background:#edf7f1;color:#1a6b3a;border:1px solid #52b778;border-radius:10px;padding:2px 8px;">&#10102; Doc Ladder (PRD→FRD→SDD→Story→TDD)</span>
+  <span style="font-size:10px;background:#eaf2fc;color:#1a4a7a;border:1px solid #4a8ecb;border-radius:10px;padding:2px 8px;">&#10103; KB Prompt Injection (_card_context + _local_context at stage startup)</span>
+  <span style="font-size:10px;background:#fff0f0;color:#c0302a;border:1px solid #c0302a;border-radius:10px;padding:2px 8px;">&#10104; Direct File Read (⑱⑲ only — HARD STOP)</span>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MAIN 3-COLUMN GRID
+═══════════════════════════════════════════ -->
+<div class="main-grid">
+
+  <!-- ══════════════════════════════════
+       COLUMN 1 — LEFT: RED CATEGORIES
+  ══════════════════════════════════ -->
+  <div class="col-left">
+    <div class="col-section-title">RED INPUT &mdash; 19 Categories</div>
+    <div class="col-section-subtitle">Hover an agent to highlight consumed categories. Click to pin.</div>
+
+    <!-- GROUP A -->
+    <div class="red-group">
+      <div class="red-group-label" style="background:#edf7f1;color:#1a6b3a;border-color:#a8d8b8;">GROUP A &mdash; Business Knowledge</div>
+      <div class="red-item" data-num="1" style="border-left-color:#1a6b3a;">
+        <span class="red-num" style="color:#1a6b3a;">&#9312;</span>
+        <span class="red-name">Functional Modules</span>
+      </div>
+      <div class="red-item" data-num="2" style="border-left-color:#1a6b3a;">
+        <span class="red-num" style="color:#1a6b3a;">&#9313;</span>
+        <span class="red-name">User Roles &amp; Permissions</span>
+      </div>
+      <div class="red-item" data-num="3" style="border-left-color:#1a6b3a;">
+        <span class="red-num" style="color:#1a6b3a;">&#9314;</span>
+        <span class="red-name">Business Rules &mdash; Thresholds</span>
+      </div>
+      <div class="red-item" data-num="4" style="border-left-color:#1a6b3a;">
+        <span class="red-num" style="color:#1a6b3a;">&#9315;</span>
+        <span class="red-name">Business Rules &mdash; Validation</span>
+      </div>
+      <div class="red-item" data-num="10" style="border-left-color:#1a6b3a;">
+        <span class="red-num" style="color:#1a6b3a;">&#9321;</span>
+        <span class="red-name">Compliance Constraints</span>
+      </div>
+    </div>
+
+    <!-- GROUP B -->
+    <div class="red-group">
+      <div class="red-group-label" style="background:#eaf2fc;color:#1a5fd4;border-color:#a0bce8;">GROUP B &mdash; UI &amp; Process</div>
+      <div class="red-item" data-num="5" style="border-left-color:#1a5fd4;">
+        <span class="red-num" style="color:#1a5fd4;">&#9316;</span>
+        <span class="red-name">Screens &amp; UI Forms</span>
+      </div>
+      <div class="red-item" data-num="6" style="border-left-color:#1a5fd4;">
+        <span class="red-num" style="color:#1a5fd4;">&#9317;</span>
+        <span class="red-name">Workflow State Machines</span>
+      </div>
+      <div class="red-item" data-num="16" style="border-left-color:#1a5fd4;">
+        <span class="red-num" style="color:#1a5fd4;">&#9327;</span>
+        <span class="red-name">Error Code Catalogue</span>
+      </div>
+      <div class="red-item" data-num="17" style="border-left-color:#1a5fd4;">
+        <span class="red-num" style="color:#1a5fd4;">&#9328;</span>
+        <span class="red-name">End-to-End Journeys</span>
+      </div>
+    </div>
+
+    <!-- GROUP C -->
+    <div class="red-group">
+      <div class="red-group-label" style="background:#f4eeff;color:#6b3faa;border-color:#c4a8e4;">GROUP C &mdash; Services &amp; Components</div>
+      <div class="red-item" data-num="11" style="border-left-color:#6b3faa;">
+        <span class="red-num" style="color:#6b3faa;">&#9322;</span>
+        <span class="red-name">Current Services / Components</span>
+      </div>
+    </div>
+
+    <!-- GROUP D -->
+    <div class="red-group">
+      <div class="red-group-label" style="background:#fff4e8;color:#b05c00;border-color:#e4b880;">GROUP D &mdash; Database</div>
+      <div class="red-item" data-num="12" style="border-left-color:#b05c00;">
+        <span class="red-num" style="color:#b05c00;">&#9323;</span>
+        <span class="red-name">Current DB Objects</span>
+      </div>
+      <div class="red-item hard-stop" data-num="18" style="border-left-color:#c0302a;">
+        <span class="red-num" style="color:#c0302a;">&#9329;</span>
+        <span class="red-name">SP Catalog</span>
+        <span class="hard-stop-badge">HARD STOP</span>
+      </div>
+      <div class="red-item hard-stop" data-num="19" style="border-left-color:#c0302a;">
+        <span class="red-num" style="color:#c0302a;">&#9330;</span>
+        <span class="red-name">Schema Snapshot</span>
+        <span class="hard-stop-badge">HARD STOP</span>
+      </div>
+    </div>
+
+    <!-- GROUP E -->
+    <div class="red-group">
+      <div class="red-group-label" style="background:#e8f7f4;color:#1a6a5a;border-color:#88d4c8;">GROUP E &mdash; Integration &amp; Ops</div>
+      <div class="red-item" data-num="7" style="border-left-color:#1a6a5a;">
+        <span class="red-num" style="color:#1a6a5a;">&#9318;</span>
+        <span class="red-name">Batch Jobs</span>
+      </div>
+      <div class="red-item" data-num="8" style="border-left-color:#1a6a5a;">
+        <span class="red-num" style="color:#1a6a5a;">&#9319;</span>
+        <span class="red-name">External Integrations</span>
+      </div>
+      <div class="red-item" data-num="13" style="border-left-color:#1a6a5a;">
+        <span class="red-num" style="color:#1a6a5a;">&#9324;</span>
+        <span class="red-name">Reports &amp; Exports</span>
+      </div>
+      <div class="red-item" data-num="14" style="border-left-color:#1a6a5a;">
+        <span class="red-num" style="color:#1a6a5a;">&#9325;</span>
+        <span class="red-name">Document Management</span>
+      </div>
+      <div class="red-item" data-num="15" style="border-left-color:#1a6a5a;">
+        <span class="red-num" style="color:#1a6a5a;">&#9326;</span>
+        <span class="red-name">Configurable Settings</span>
+      </div>
+    </div>
+
+    <!-- GROUP F -->
+    <div class="red-group">
+      <div class="red-group-label" style="background:#f0f2f8;color:#5c6480;border-color:#b0b8cc;">GROUP F &mdash; Operations</div>
+      <div class="red-item" data-num="9" style="border-left-color:#5c6480;">
+        <span class="red-num" style="color:#5c6480;">&#9320;</span>
+        <span class="red-name">Performance Baselines</span>
+      </div>
+    </div>
+
+  </div><!-- /col-left -->
+
+
+  <!-- ══════════════════════════════════
+       COLUMN 2 — CENTER: PIPELINE
+  ══════════════════════════════════ -->
+  <div class="col-center">
+
+    <!-- ─────────────────────────────────
+         GLOBAL WORKSPACE — Foundation
+    ───────────────────────────────── -->
+    <div class="workspace-section">
+      <div class="workspace-header" style="background:var(--global-bg);border-color:var(--global-border);color:var(--global);">
+        <span class="ws-icon">&#127760;</span>
+        <span class="ws-title">Global Workspace</span>
+        <span class="ws-desc">&mdash; Foundation Documents</span>
+        <span class="ws-count" style="background:rgba(26,107,58,0.12);color:var(--global);">G1 &ndash; G2</span>
+      </div>
+      <div class="workspace-body" style="border-color:var(--global-border);background:#fafdfb;">
+
+        <!-- G1: PRD -->
+        <div class="agent-card" data-stage="G1" data-consumes="1,2,3,4,6,10,11">
+          <div class="agent-tooltip">Consuming RED: &#9312; &#9313; &#9314; &#9315; &#9317; &#9321; &#9322;</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--global);">G1</span>
+            <span class="agent-name">Product Requirements Document (PRD)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9312; Functional Modules">&#9312;</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9313; User Roles &amp; Permissions">&#9313;</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9314; Business Rules &mdash; Thresholds">&#9314;</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9315; Business Rules &mdash; Validation">&#9315;</span>
+            <span class="cat-badge" style="background:#1a5fd4;" title="&#9317; Workflow State Machines">&#9317;</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9321; Compliance Constraints">&#9321;</span>
+            <span class="cat-badge" style="background:#6b3faa;" title="&#9322; Current Services / Components">&#9322;</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">prd.md</span>
+            <span class="artifact-badge">business-rules.md</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- G2: FRD -->
+        <div class="agent-card" data-stage="G2" data-consumes="3,4,12">
+          <div class="agent-tooltip">Consuming RED: &#9314; &#9315; &#9323;</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--global);">G2</span>
+            <span class="agent-name">Functional Requirements Document (FRD)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9314; Business Rules &mdash; Thresholds">&#9314;</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9315; Business Rules &mdash; Validation">&#9315;</span>
+            <span class="cat-badge" style="background:#b05c00;" title="&#9323; Current DB Objects">&#9323;</span>
+            <span class="inherited-badge">+ prd from G1</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">frd.md</span>
+            <span class="artifact-badge">frd-traceability.json</span>
+            <span class="artifact-badge">frd-gaps.md</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /workspace Global Foundation -->
+
+    <!-- HITL Gate after G2 -->
+    <div class="gate-row">
+      <div class="gate-badge">
+        <span class="gate-icon">&#9989;</span>
+        HITL Gate &mdash; Human Approval Required (FRD)
+      </div>
+    </div>
+
+    <!-- Transition arrow -->
+    <div class="workspace-transition">
+      <div class="transition-line"></div>
+      <div class="transition-label">Approved artifacts pass to Architecture Workspace</div>
+      <div class="transition-line"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         ARCHITECTURE WORKSPACE
+    ───────────────────────────────── -->
+    <div class="workspace-section">
+      <div class="workspace-header" style="background:var(--arch-bg);border-color:var(--arch-border);color:var(--arch);">
+        <span class="ws-icon">&#127963;</span>
+        <span class="ws-title">Architecture Workspace</span>
+        <span class="ws-desc">&mdash; Technical Design</span>
+        <span class="ws-count" style="background:rgba(138,72,0,0.1);color:var(--arch);">A1 &ndash; A4</span>
+      </div>
+      <div class="workspace-body" style="border-color:var(--arch-border);background:#fffdf8;">
+
+        <!-- A1: ADR -->
+        <div class="agent-card" data-stage="A1" data-consumes="1,2,3">
+          <div class="agent-tooltip">Consuming RED: &#9312; &#9313; &#9314; (inherited context via FRD)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--arch);">A1</span>
+            <span class="agent-name">Architecture Decision Records (ADR)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9312; Functional Modules">&#9312;</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9313; User Roles &amp; Permissions">&#9313;</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9314; Business Rules &mdash; Thresholds">&#9314;</span>
+            <span class="inherited-badge">inherited context via FRD</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">ADR-*.md files</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- A2: NFR -->
+        <div class="agent-card" data-stage="A2" data-consumes="9">
+          <div class="agent-tooltip">Consuming RED: &#9320;</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--arch);">A2</span>
+            <span class="agent-name">Non-Functional Requirements (NFR)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#5c6480;" title="&#9320; Performance Baselines">&#9320;</span>
+            <span class="inherited-badge">+ FRD + ADR</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">NFR.md</span>
+            <span class="artifact-badge">nfr-thresholds.json</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- A3: SDD -->
+        <div class="agent-card" data-stage="A3" data-consumes="">
+          <div class="agent-tooltip">Consuming: FRD + ADR + NFR (no direct RED)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--arch);">A3</span>
+            <span class="agent-name">System Design Document (SDD)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">FRD + ADR + NFR</span>
+            <span class="inherited-badge">tech stack from domain-pack</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">SDD.md</span>
+            <span class="artifact-badge">Mermaid diagrams</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- A4: SRD -->
+        <div class="agent-card" data-stage="A4" data-consumes="">
+          <div class="agent-tooltip">Consuming: SDD + FRD + NFR (no direct RED)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--arch);">A4</span>
+            <span class="agent-name">System Requirements Document (SRD)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">SDD + FRD + NFR</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">SRD.md</span>
+            <span class="artifact-badge">epic-candidates.json</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /workspace Architecture -->
+
+    <!-- HITL Gate after A4/SRD -->
+    <div class="gate-row">
+      <div class="gate-badge">
+        <span class="gate-icon">&#9989;</span>
+        HITL Gate &mdash; Human Approval Required (SRD)
+      </div>
+    </div>
+
+    <!-- Transition arrow -->
+    <div class="workspace-transition">
+      <div class="transition-line"></div>
+      <div class="transition-label">Approved artifacts pass to Global Epic Tier</div>
+      <div class="transition-line"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         GLOBAL WORKSPACE — EPIC TIER
+    ───────────────────────────────── -->
+    <div class="workspace-section">
+      <div class="workspace-header" style="background:var(--global-bg);border-color:var(--global-border);color:var(--global);">
+        <span class="ws-icon">&#127760;</span>
+        <span class="ws-title">Global Workspace &mdash; EPIC Tier</span>
+        <span class="ws-desc">&mdash; EPIC Decomposition</span>
+        <span class="ws-count" style="background:rgba(26,107,58,0.12);color:var(--global);">G3 &ndash; G6</span>
+      </div>
+      <div class="workspace-body" style="border-color:var(--global-border);background:#fafdfb;">
+
+        <!-- G3: EPIC Set -->
+        <div class="agent-card" data-stage="G3" data-consumes="3,6">
+          <div class="agent-tooltip">Consuming RED: &#9314; &#9317;</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--global);">G3</span>
+            <span class="agent-name">EPIC Set Generation</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#1a6b3a;" title="&#9314; Business Rules &mdash; Thresholds">&#9314;</span>
+            <span class="cat-badge" style="background:#1a5fd4;" title="&#9317; Workflow State Machines">&#9317;</span>
+            <span class="inherited-badge">+ SRD + FRD</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">epic.md</span>
+            <span class="artifact-badge">epic-candidates.json</span>
+          </div>
+        </div>
+
+        <!-- HITL Gate after G3 -->
+        <div class="gate-row" style="padding:5px 0;">
+          <div class="gate-badge">
+            <span class="gate-icon">&#9989;</span>
+            HITL Gate &mdash; Human Approval Required (EPIC Set)
+          </div>
+        </div>
+
+        <!-- FAN-OUT INDICATOR -->
+        <div class="fanout-box">
+          <div class="fanout-title">&#8595; Opens 1 Mini Workspace per EPIC &mdash; runs concurrently &#8595;</div>
+          <div class="fanout-epics">
+            <span class="epic-chip">EPIC-1</span>
+            <span class="epic-chip">EPIC-2</span>
+            <span class="epic-chip">EPIC-3</span>
+            <span style="font-size:13px;color:var(--mini);font-weight:700;">&hellip;</span>
+            <div class="fanout-arrow-label">
+              <span class="fanout-arrow-sym">&#8594;</span>
+              <span class="fanout-arrow-text">concurrent</span>
+            </div>
+            <span class="mini-ws-chip">Mini Workspace &times;N</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- G4: Feature -->
+        <div class="agent-card" data-stage="G4" data-consumes="">
+          <div class="agent-tooltip">Consuming: SRD + FRD + epic (per EPIC, no direct RED)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--global);">G4</span>
+            <span class="agent-name">Feature Generation (per EPIC)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">SRD + FRD + epic (per EPIC)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">feature.md per EPIC</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- G5: User Story -->
+        <div class="agent-card" data-stage="G5" data-consumes="6,17">
+          <div class="agent-tooltip">Consuming RED: &#9317; &#9328;</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--global);">G5</span>
+            <span class="agent-name">User Story Generation (per EPIC)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#1a5fd4;" title="&#9317; Workflow State Machines">&#9317;</span>
+            <span class="cat-badge" style="background:#1a5fd4;" title="&#9328; End-to-End Journeys">&#9328;</span>
+            <span class="inherited-badge">+ epic + feature</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">user-story.md per EPIC</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- G6: Coverage -->
+        <div class="agent-card" data-stage="G6" data-consumes="">
+          <div class="agent-tooltip">Consuming: user-story + feature + SRD (no direct RED)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--global);">G6</span>
+            <span class="agent-name">Coverage Validation</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">user-story + feature + SRD</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">coverage-report.md</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /workspace Global Epic Tier -->
+
+    <!-- Transition arrow -->
+    <div class="workspace-transition">
+      <div class="transition-line"></div>
+      <div class="transition-label">Approved artifacts pass to Mini Workspace (per EPIC)</div>
+      <div class="transition-line"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         HOW RED REACHES DOWNSTREAM AGENTS — explanation panel
+    ───────────────────────────────── -->
+    <div style="background:#fffbe6;border:2px solid #d4861e;border-radius:10px;padding:16px 20px;margin:8px 0 16px 0;">
+      <div style="font-weight:700;font-size:13px;color:#8a4800;margin-bottom:10px;">
+        &#9432; How RED Information Reaches Mini Workspace Agents (M1–M7)
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <!-- Path 1 -->
+        <div style="background:#edf7f1;border:1px solid #52b778;border-radius:7px;padding:10px 12px;">
+          <div style="font-weight:700;color:#1a6b3a;font-size:12px;margin-bottom:6px;">&#10102; Document Ladder (primary)</div>
+          <div style="font-size:11.5px;color:#1e2340;line-height:1.6;">
+            RED is injected <strong>only at G1 PRD</strong> via <code style="background:#d4edda;padding:1px 4px;border-radius:3px;">_fetch_graph_rules()</code> or <code style="background:#d4edda;padding:1px 4px;border-radius:3px;">_local_context()</code>.<br><br>
+            Knowledge is then distilled and structured through the pipeline:<br>
+            <span style="color:#1a6b3a;">RED → BRL-NNN (G1) → FR-NNN (G2) → SDD (A3) → SRD (A4) → EPIC → Feature → User Story → TDDs (M1)</span><br><br>
+            By the time M1 receives <code style="background:#d4edda;padding:1px 4px;border-radius:3px;">user-story.md</code>, business rules, workflow states, and component logic are already encoded with source citations (BRL-NNN → RED file:line).
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:#1a6b3a;font-weight:600;">Carries: ①②③④⑤⑥⑦⑧⑩⑪⑬⑭⑮⑯</div>
+        </div>
+        <!-- Path 2 -->
+        <div style="background:#eaf2fc;border:1px solid #4a8ecb;border-radius:7px;padding:10px 12px;">
+          <div style="font-weight:700;color:#1a4a7a;font-size:12px;margin-bottom:6px;">&#10103; KB Prompt Injection (at agent startup — NOT live MCP queries)</div>
+          <div style="font-size:11.5px;color:#1e2340;line-height:1.6;">
+            The KB is built by a <strong>separate manually-triggered pipeline</strong> (<code style="background:#dbeafe;padding:1px 4px;border-radius:3px;">re-kb-build.yaml</code>) before the SDLC pipeline starts. It is NOT automatically gated as a prerequisite of uw-cr-global.<br><br>
+            <strong>Two stores are populated:</strong> CardStore on disk (BM25 → <code style="background:#dbeafe;padding:1px 4px;border-radius:3px;">_card_context()</code>) and Postgres pgvector (vector search → <code style="background:#dbeafe;padding:1px 4px;border-radius:3px;">_local_context()</code>).<br><br>
+            At each stage startup, the platform pre-assembles a <strong>static context block</strong> from these stores and injects it into the agent prompt — before the agent starts. This is NOT a live mid-run query. <br><br>
+            <code style="background:#dbeafe;padding:1px 4px;border-radius:3px;">mcp__kb__*</code> tools ARE in every stage's allowlist, but the MCP server only launches when <code style="background:#dbeafe;padding:1px 4px;border-radius:3px;">FE_KB_AGENT_TOOLS=mcp</code> AND <code style="background:#dbeafe;padding:1px 4px;border-radius:3px;">KB_BACKEND_ROOT</code> env var is set. No agent prompt file explicitly calls these tools.<br><br>
+            <strong style="color:#c0302a;">⚠ M2 (UI Code) and M3 (API Code) stages get NO card injection</strong> — <code style="background:#fde8e8;padding:1px 4px;border-radius:3px;">_card_context()</code> skips stages where <code style="background:#fde8e8;padding:1px 4px;border-radius:3px;">target != "docs"</code>. These stages rely entirely on TDDs and domain-pack.
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:#1a4a7a;font-weight:600;">Carries: ⑥⑪⑫ via injected card/chunk context (docs-target stages only)</div>
+        </div>
+        <!-- Path 3 -->
+        <div style="background:#fff0f0;border:1px solid #c0302a;border-radius:7px;padding:10px 12px;">
+          <div style="font-weight:700;color:#c0302a;font-size:12px;margin-bottom:6px;">&#10104; Direct File Read (DB artifacts only)</div>
+          <div style="font-size:11.5px;color:#1e2340;line-height:1.6;">
+            <strong>⑱ SP-catalog.json</strong> and <strong>⑲ schema-snapshot.json</strong> are NOT KB-indexed.<br><br>
+            They are structured JSON files extracted directly from the non-production MS SQL database by the <code style="background:#fde8e8;padding:1px 4px;border-radius:3px;">procedure-introspector</code> and <code style="background:#fde8e8;padding:1px 4px;border-radius:3px;">schema-reverse-engineer</code> agents and stored as workspace files.<br><br>
+            M1's <code style="background:#fde8e8;padding:1px 4px;border-radius:3px;">springboot-tdd-designer</code> reads them directly using the <code style="background:#fde8e8;padding:1px 4px;border-radius:3px;">Read</code> tool. <strong>If absent: HARD STOP — M1 halts immediately.</strong>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:#c0302a;font-weight:600;">Carries: ⑱⑲ (SP signatures + DB table structure) — HARD STOP</div>
+        </div>
+      </div>
+      <!-- Summary row -->
+      <div style="margin-top:12px;font-size:11.5px;color:#5c6480;background:#f8f9fc;border-radius:5px;padding:8px 12px;">
+        <strong>Bottom line:</strong> RED is injected at G1 once. All downstream agents (M1–M7, EA1–EA5) access RED knowledge through (1) the document ladder (structured artifacts refined at each stage), (2) KB prompt injection — <code style="background:#e8eaf6;padding:1px 4px;border-radius:3px;">_card_context()</code> (BM25 over CardStore) + <code style="background:#e8eaf6;padding:1px 4px;border-radius:3px;">_local_context()</code> (Postgres pgvector) inject a static context block before the agent starts, docs-target stages only — or (3) direct JSON file reads (⑱⑲ only). No second raw RED injection; no always-on live MCP queries.
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         MINI WORKSPACE — per EPIC
+    ───────────────────────────────── -->
+    <div class="workspace-section">
+      <div class="workspace-header" style="background:var(--mini-bg);border-color:var(--mini-border);color:var(--mini);">
+        <span class="ws-icon">&#9881;</span>
+        <span class="ws-title">Mini Workspace</span>
+        <span class="ws-desc">&mdash; Implementation (per EPIC)</span>
+        <span class="ws-count" style="background:rgba(26,74,122,0.1);color:var(--mini);">M1 &ndash; M7</span>
+      </div>
+      <div class="concurrent-tag">
+        <span class="concurrent-pill">&#9654; Runs concurrently &mdash; one instance per EPIC</span>
+      </div>
+      <div class="workspace-body" style="border-color:var(--mini-border);border-top:2px solid var(--mini-border);background:#f8fbff;">
+
+        <!-- M1: LLD/TDDs — updated to show 3 RED access paths -->
+        <div class="agent-card" data-stage="M1" data-consumes="6,11,12,18,19">
+          <div class="agent-tooltip">Consuming RED via 3 paths: &#9317;&#9322;&#9323; via KB · &#9329;&#9330; direct file read</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--mini);">M1</span>
+            <span class="agent-name">Low-Level Design / TDDs</span>
+          </div>
+          <!-- Path 1: Document Ladder -->
+          <div class="agent-row" style="background:#edf7f1;border-radius:4px;padding:4px 8px;margin-bottom:4px;">
+            <span class="row-label" style="color:#1a6b3a;font-weight:700;">&#10102; Doc Ladder:</span>
+            <span style="font-size:11px;color:#1a6b3a;">user-story &#8592; Feature &#8592; FRD &#8592; PRD &#8592; RED</span>
+            <span style="font-size:11px;color:#5c6480;margin-left:6px;">(business rules &amp; workflows already encoded)</span>
+          </div>
+          <!-- Path 2: KB Prompt Injection -->
+          <div class="agent-row" style="background:#eaf2fc;border-radius:4px;padding:4px 8px;margin-bottom:4px;">
+            <span class="row-label" style="color:#1a4a7a;font-weight:700;">&#10103; KB Inject:</span>
+            <span class="cat-badge" style="background:#1a5fd4;" title="&#9317; Workflow State Machines">&#9317;</span>
+            <span class="cat-badge" style="background:#6b3faa;" title="&#9322; Current Services / Components">&#9322;</span>
+            <span class="cat-badge" style="background:#b05c00;" title="&#9323; Current DB Objects">&#9323;</span>
+            <span style="font-size:11px;color:#1a4a7a;margin-left:4px;">_card_context() + _local_context() injected at startup (static block; docs-target only)</span>
+          </div>
+          <!-- Path 3: Direct file read -->
+          <div class="agent-row" style="background:#fff0f0;border-radius:4px;padding:4px 8px;margin-bottom:4px;">
+            <span class="row-label" style="color:#c0302a;font-weight:700;">&#10104; Direct Read:</span>
+            <span class="cat-badge" style="background:#c0302a;" title="&#9329; SP Catalog &mdash; HARD STOP">&#9329;</span>
+            <span class="cat-badge" style="background:#c0302a;" title="&#9330; Schema Snapshot &mdash; HARD STOP">&#9330;</span>
+            <span style="font-size:11px;color:#c0302a;margin-left:4px;">Read tool on SP-catalog.json &amp; schema-snapshot.json &mdash; <strong>HARD STOP if absent</strong></span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Formal Inputs:</span>
+            <span class="inherited-badge">user-story</span>
+            <span class="inherited-badge">SDD</span>
+            <span class="inherited-badge">NFR</span>
+            <span class="inherited-badge">Master TDD (~41K tokens)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">feature-tdd</span>
+            <span class="artifact-badge">ui-tdd</span>
+            <span class="artifact-badge">service-tdd</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- M2: UI Code -->
+        <div class="agent-card" data-stage="M2" data-consumes="5,16">
+          <div class="agent-tooltip">Consuming RED: &#9316; &#9327;</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--mini);">M2</span>
+            <span class="agent-name">UI Code Generation</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#1a5fd4;" title="&#9316; Screens &amp; UI Forms">&#9316;</span>
+            <span class="cat-badge" style="background:#1a5fd4;" title="&#9327; Error Code Catalogue">&#9327;</span>
+            <span class="inherited-badge">+ ui-tdd</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">Angular 18 / Axis source</span>
+            <span class="artifact-badge">ui-unit-tests</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- M3: API Code -->
+        <div class="agent-card" data-stage="M3" data-consumes="7,8,13,14,15">
+          <div class="agent-tooltip">Consuming RED: &#9318; &#9319; &#9324; &#9325; &#9326;</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--mini);">M3</span>
+            <span class="agent-name">API Code Generation</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#1a6a5a;" title="&#9318; Batch Jobs">&#9318;</span>
+            <span class="cat-badge" style="background:#1a6a5a;" title="&#9319; External Integrations">&#9319;</span>
+            <span class="cat-badge" style="background:#1a6a5a;" title="&#9324; Reports &amp; Exports">&#9324;</span>
+            <span class="cat-badge" style="background:#1a6a5a;" title="&#9325; Document Management">&#9325;</span>
+            <span class="cat-badge" style="background:#1a6a5a;" title="&#9326; Configurable Settings">&#9326;</span>
+            <span class="inherited-badge">+ service-tdd + domain-pack</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">Spring Boot source</span>
+            <span class="artifact-badge">OpenAPI spec</span>
+            <span class="artifact-badge">build.gradle</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- M4: Security OPA (key: security-opa, seq 3) -->
+        <div class="agent-card" data-stage="M4" data-consumes="2,3,10">
+          <div class="agent-tooltip">RED via: ②③⑩ via business-rules.md (G1 artifact, Doc Ladder)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--mini);">M4</span>
+            <span class="agent-name">Security Review &amp; OPA Policies</span>
+          </div>
+          <div class="agent-row" style="background:#edf7f1;border-radius:4px;padding:4px 8px;margin-bottom:4px;">
+            <span class="row-label" style="color:#1a6b3a;font-weight:700;">&#10102; Doc Ladder:</span>
+            <span class="cat-badge" style="background:#5c2d8a;" title="&#9313; User Roles &amp; Permissions">&#9313;</span>
+            <span class="cat-badge" style="background:#8b1a6b;" title="&#9314; Business Rules &mdash; Thresholds">&#9314;</span>
+            <span class="cat-badge" style="background:#7a1a1a;" title="&#9321; Compliance Constraints">&#9321;</span>
+            <span style="font-size:11px;color:#1a6b3a;">via <strong>business-rules.md</strong> (G1 output — formal M4 input)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">api-source</span>
+            <span class="inherited-badge">ui-source</span>
+            <span class="inherited-badge">business-rules</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">security-report</span>
+            <span class="artifact-badge">opa-policies</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- M5: API Testing (key: api-test, seq 4) -->
+        <div class="agent-card" data-stage="M5" data-consumes="">
+          <div class="agent-tooltip">Consuming: api-source + service-tdd (no direct RED — already in TDDs)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--mini);">M5</span>
+            <span class="agent-name">API Testing (JUnit 5 / MockMvc)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">api-source</span>
+            <span class="inherited-badge">service-tdd</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">api-tests (JUnit 5 / Mockito / MockMvc)</span>
+            <span class="artifact-badge">&gt;80% coverage</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- M6: UI Jasmine Test (key: ui-smoke, seq 5) -->
+        <div class="agent-card" data-stage="M6" data-consumes="1,2,5">
+          <div class="agent-tooltip">Consuming RED: ①②⑤ via ui-tdd (Doc Ladder)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--mini);">M6</span>
+            <span class="agent-name">UI Jasmine Test</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">ui-source</span>
+            <span class="inherited-badge">ui-tdd</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">ui-smoke-results (Jasmine + Jest)</span>
+            <span class="artifact-badge">&gt;80% coverage</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /workspace Mini -->
+
+    <!-- Transition arrow -->
+    <div class="workspace-transition">
+      <div class="transition-line"></div>
+      <div class="transition-label">All EPIC worktrees pass to Epic Assembler</div>
+      <div class="transition-line"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         EPIC ASSEMBLER
+    ───────────────────────────────── -->
+    <div class="workspace-section">
+      <div class="workspace-header" style="background:var(--assembler-bg);border-color:var(--assembler-border);color:var(--assembler);">
+        <span class="ws-icon">&#128295;</span>
+        <span class="ws-title">Epic Assembler</span>
+        <span class="ws-desc">&mdash; Integration &amp; Deployment</span>
+        <span class="ws-count" style="background:rgba(26,106,90,0.1);color:var(--assembler);">EA1 &ndash; EA6</span>
+      </div>
+      <div class="workspace-body" style="border-color:var(--assembler-border);background:#f8fdfc;">
+
+        <!-- EA1: Assemble -->
+        <div class="agent-card" data-stage="EA1" data-consumes="">
+          <div class="agent-tooltip">Consuming: all EPIC worktrees — no direct RED</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--assembler);">EA1</span>
+            <span class="agent-name">EPIC Assembly &amp; Integration</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">all EPIC branches (M1–M6 outputs)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">integrated-api</span>
+            <span class="artifact-badge">integrated-ui</span>
+            <span class="artifact-badge">validation-report</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- EA2: DB Integration (key: db-wiring, seq 2) -->
+        <div class="agent-card" data-stage="EA2" data-consumes="12,18,19">
+          <div class="agent-tooltip">RED via: ⑫ DB schema context · ⑱⑲ produced here from DB details doc</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--assembler);">EA2</span>
+            <span class="agent-name">DB Integration</span>
+          </div>
+          <div class="agent-row" style="background:#fff0f0;border-radius:4px;padding:4px 8px;margin-bottom:4px;">
+            <span class="row-label" style="color:#c0302a;font-weight:700;">&#10104; Produces:</span>
+            <span class="cat-badge" style="background:#c0302a;" title="&#9329; SP Catalog">&#9329;</span>
+            <span class="cat-badge" style="background:#c0302a;" title="&#9330; Schema Snapshot">&#9330;</span>
+            <span style="font-size:11px;color:#c0302a;">SP-catalog.json + schema-snapshot.json extracted from DB details doc</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">integrated-api</span>
+            <span class="inherited-badge">user-supplied DB details doc</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">db-config</span>
+            <span class="artifact-badge">db-schema (⑱⑲)</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- EA3: Local Deployment (key: local-deployment, seq 3) -->
+        <div class="agent-card" data-stage="EA3" data-consumes="">
+          <div class="agent-tooltip">Gradle build + npm build, health check — no direct RED</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--assembler);">EA3</span>
+            <span class="agent-name">Local Deployment</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">integrated-api</span>
+            <span class="inherited-badge">integrated-ui</span>
+            <span class="inherited-badge">db-config</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">deployment-report (live URLs)</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- EA4: UI Smoke Test (key: ui-smoke, seq 4) -->
+        <div class="agent-card" data-stage="EA4" data-consumes="17">
+          <div class="agent-tooltip">RED via: ⑰ E2E Journeys (via user-stories, Doc Ladder)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--assembler);">EA4</span>
+            <span class="agent-name">UI Smoke Test (Playwright — happy-path)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#2a6a5a;" title="&#9328; E2E Journeys">&#9328;</span>
+            <span class="inherited-badge">user-story</span>
+            <span class="inherited-badge">integrated-ui</span>
+            <span class="inherited-badge">deployment-report</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">assembled-smoke-results</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- EA5: UI E2E Test (key: ui-e2e, seq 5) -->
+        <div class="agent-card" data-stage="EA5" data-consumes="1,2,5,17">
+          <div class="agent-tooltip">RED via: ①②⑤⑰ via user-stories (Doc Ladder)</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--assembler);">EA5</span>
+            <span class="agent-name">UI E2E Test (Playwright — full journeys)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes RED:</span>
+            <span class="cat-badge" style="background:#3b5bdb;" title="&#9312; Functional Modules">&#9312;</span>
+            <span class="cat-badge" style="background:#5c2d8a;" title="&#9313; User Roles">&#9313;</span>
+            <span class="cat-badge" style="background:#1a7a5e;" title="&#9316; Screens/UI">&#9316;</span>
+            <span class="cat-badge" style="background:#2a6a5a;" title="&#9328; E2E Journeys">&#9328;</span>
+            <span style="font-size:11px;color:#5c6480;margin-left:4px;">via user-stories (Doc Ladder)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">e2e-results</span>
+            <span class="artifact-badge">e2e-evidence (trace/screenshot/video)</span>
+          </div>
+        </div>
+
+        <div class="flow-down-arrow">&#8595;</div>
+
+        <!-- EA6: PR Merge (key: pr-merge, seq 6) -->
+        <div class="agent-card" data-stage="EA6" data-consumes="">
+          <div class="agent-tooltip">External CI/CD — no direct RED</div>
+          <div class="agent-card-top">
+            <span class="stage-badge" style="background:var(--assembler);">EA6</span>
+            <span class="agent-name">PR Merge</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Consumes:</span>
+            <span class="inherited-badge">e2e-results (gate: all approved)</span>
+          </div>
+          <div class="agent-row">
+            <span class="row-label">Produces:</span>
+            <span class="artifact-badge">merged-branch (all EPICs → main)</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /workspace Epic Assembler -->
+
+  </div><!-- /col-center -->
+
+
+  <!-- ══════════════════════════════════
+       COLUMN 3 — RIGHT: TARGET APPLICATION
+  ══════════════════════════════════ -->
+  <div class="col-right">
+    <div class="col-section-title">TARGET APPLICATION</div>
+    <div class="col-section-subtitle" style="margin-bottom:14px;">Angular 18 + Spring Boot 3 + MS SQL (IMMUTABLE)</div>
+
+    <!-- TIER 1: Angular UI -->
+    <div class="tier-card" style="background:#eaf2fc;border-color:var(--mini-border);">
+      <div class="tier-header">
+        <span class="tier-icon">&#128187;</span>
+        <span class="tier-title" style="color:var(--mini);">Angular UI (Frontend)</span>
+      </div>
+      <ul class="tier-items">
+        <li>Angular 18 / Standalone Components</li>
+        <li>Axis v18.0.32 (78 components)</li>
+        <li>Point HTTP Client</li>
+        <li>UIValidators</li>
+        <li>S3 + CloudFront hosted</li>
+      </ul>
+      <div class="tier-producer">Produced by: M2 &rarr; EA1</div>
+    </div>
+
+    <!-- TIER 2: Spring Boot API -->
+    <div class="tier-card" style="background:var(--arch-bg);border-color:var(--arch-border);">
+      <div class="tier-header">
+        <span class="tier-icon">&#9881;</span>
+        <span class="tier-title" style="color:var(--arch);">Spring Boot API (Backend)</span>
+      </div>
+      <ul class="tier-items">
+        <li>Spring Boot 3 / Java 21</li>
+        <li>Gradle (build.gradle)</li>
+        <li>6 Microservices on ECS Fargate</li>
+        <li>Spring Cloud Gateway :8080</li>
+        <li>Spring Batch (6 SSIS replacements)</li>
+        <li>SQS / SNS / SES messaging</li>
+        <li>JaCoCo &ge;80% | OWASP gate</li>
+      </ul>
+      <div class="tier-producer">Produced by: M3 &rarr; EA1 (assembly) &rarr; EA2 (DB wiring)</div>
+    </div>
+
+    <!-- TIER 3: MS SQL DB -->
+    <div class="tier-card" style="background:#f3f3f7;border-color:#9090b0;">
+      <div class="tier-header">
+        <span class="tier-icon">&#128451;</span>
+        <span class="tier-title" style="color:#3a3a5c;">MS SQL Database</span>
+      </div>
+      <ul class="tier-items">
+        <li>CreditApp DB (IMMUTABLE)</li>
+        <li>279 Tables &mdash; ZERO DDL</li>
+        <li>50+ Stored Procedures (CALLED)</li>
+        <li>ddl-auto=validate</li>
+        <li>Flyway baseline+validate only</li>
+        <li>HikariCP connection pool</li>
+      </ul>
+      <div class="tier-producer">DB Integration: EA2 (db-wiring) patches datasource / Flyway / SP DAOs</div>
+    </div>
+
+    <!-- TIER 4: Security & Infra -->
+    <div class="tier-card" style="background:#f4eeff;border-color:#a07dd4;">
+      <div class="tier-header">
+        <span class="tier-icon">&#128274;</span>
+        <span class="tier-title" style="color:var(--purple);">Security &amp; Infrastructure</span>
+      </div>
+      <ul class="tier-items">
+        <li>Okta OIDC (Auth Code + PKCE)</li>
+        <li>OPA Rego sidecar (per service)</li>
+        <li>anyRequest().denyAll()</li>
+        <li>API Gateway, ECR, ECS Fargate</li>
+        <li>SQS, SNS, SES, S3</li>
+        <li>Parameter Store &amp; Secrets Manager</li>
+        <li>CloudWatch monitoring</li>
+      </ul>
+      <div class="tier-producer">Produced by: M4 (Security OPA) &rarr; EA6 (PR Merge)</div>
+    </div>
+
+    <!-- METRICS BOX -->
+    <div class="metrics-box">
+      <div class="metrics-title">Key Pipeline Metrics</div>
+      <div class="metric-row">
+        <span class="metric-label">Total stages</span>
+        <span class="metric-value">22</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Workspaces</span>
+        <span class="metric-value">4</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">RED input categories</span>
+        <span class="metric-value">19</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Spring Boot microservices</span>
+        <span class="metric-value">6</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">HITL approval gates</span>
+        <span class="metric-value" style="color:var(--global);">3</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">HARD STOP gates</span>
+        <span class="metric-value" style="color:var(--red);">2 (&#9329;&#9330;)</span>
+      </div>
+    </div>
+
+  </div><!-- /col-right -->
+
+</div><!-- /main-grid -->
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT — Interactivity
+═══════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  var redItems   = document.querySelectorAll('.red-item');
+  var agentCards = document.querySelectorAll('.agent-card');
+  var pinnedCard = null;
+
+  /* Parse the data-consumes CSV into an integer array */
+  function getConsumes(card) {
+    var raw = (card.dataset.consumes || '').trim();
+    if (!raw) return [];
+    return raw.split(',').map(function(s){ return parseInt(s.trim(), 10); }).filter(function(n){ return !isNaN(n); });
+  }
+
+  /* Apply highlight/dim to col-1 RED items */
+  function applyHighlight(consumesArr) {
+    redItems.forEach(function(item) {
+      var num = parseInt(item.dataset.num, 10);
+      var isHardStop = item.classList.contains('hard-stop');
+
+      if (consumesArr.length === 0) {
+        item.classList.remove('highlighted', 'dimmed');
+        return;
+      }
+      if (consumesArr.indexOf(num) !== -1) {
+        item.classList.add('highlighted');
+        item.classList.remove('dimmed');
+      } else {
+        item.classList.add('dimmed');
+        item.classList.remove('highlighted');
+      }
+    });
+  }
+
+  function clearHighlights() {
+    redItems.forEach(function(item) {
+      item.classList.remove('highlighted', 'dimmed');
+    });
+  }
+
+  /* Wire up each agent card */
+  agentCards.forEach(function(card) {
+
+    /* Hover in */
+    card.addEventListener('mouseenter', function() {
+      if (pinnedCard !== null && pinnedCard !== card) return; /* pinned card blocks hover on others */
+      if (pinnedCard === null) {
+        applyHighlight(getConsumes(card));
+        card.classList.add('active');
+      }
+    });
+
+    /* Hover out */
+    card.addEventListener('mouseleave', function() {
+      if (pinnedCard !== null) return;
+      clearHighlights();
+      card.classList.remove('active');
+    });
+
+    /* Click = pin / unpin */
+    card.addEventListener('click', function() {
+      if (pinnedCard === card) {
+        /* Unpin */
+        card.classList.remove('pinned', 'active');
+        pinnedCard = null;
+        clearHighlights();
+      } else {
+        /* Unpin previous, pin this */
+        if (pinnedCard !== null) {
+          pinnedCard.classList.remove('pinned', 'active');
+        }
+        pinnedCard = card;
+        card.classList.add('pinned', 'active');
+        applyHighlight(getConsumes(card));
+      }
+    });
+  });
+
+  /* Clicking anywhere outside an agent card clears pin */
+  document.addEventListener('click', function(e) {
+    if (pinnedCard !== null && !e.target.closest('.agent-card')) {
+      pinnedCard.classList.remove('pinned', 'active');
+      pinnedCard = null;
+      clearHighlights();
+    }
+  });
+
+})();
+</script>
+
+
+<!-- ===== Card Type -> Respective Pipeline Stages (verified) ===== -->
+<div style="max-width:1100px;margin:28px auto;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:20px 24px;font-family:'Segoe UI',Arial,sans-serif;">
+  <div style="font-size:18px;font-weight:800;color:#1a2a4a;margin-bottom:4px;">Card Type &rarr; Respective Pipeline Stages <span style="font-size:12px;font-weight:600;color:#1a6b3a;">(verified against pipeline YAMLs + stage_executor)</span></div>
+  <div style="font-size:12.5px;color:#5c6480;line-height:1.6;margin-bottom:12px;">
+    Typed cards are injected (via <code style="background:#eef2ff;padding:1px 4px;border-radius:3px;">_card_context()</code>) <strong>only into docs-target stages</strong> &mdash;
+    Global <strong>G1&ndash;G6</strong>, Architecture <strong>A1&ndash;A4</strong>, and Mini <strong>M1</strong> (LLD/TDDs). Each stage pulls the cards relevant to it (query-driven).
+  </div>
+  <div style="background:#fff8e8;border-left:4px solid #d08a00;border-radius:6px;padding:9px 13px;font-size:12px;color:#7a4000;margin-bottom:14px;">
+    <strong>NO card injection</strong> at code/test/policy stages &mdash; <strong>M2</strong> UI-code, <strong>M3</strong> API-code, <strong>M4</strong> Security-OPA, <strong>M5</strong> API-test, <strong>M6</strong> UI-smoke &mdash; and <strong>all Epic-Assembler</strong> stages. They build from the <strong>TDDs + domain-pack</strong>, so a card must land in the <strong>M1 TDD</strong> to influence generated code.
+  </div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <thead>
+      <tr style="background:#1e2340;color:#fff;text-align:left;">
+        <th style="padding:8px 10px;">Card</th><th style="padding:8px 10px;">Injected at (docs stages)</th>
+        <th style="padding:8px 10px;">Primary home stage</th><th style="padding:8px 10px;">Ultimately builds (via TDD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">FR &mdash; Functional Requirement</td><td style="padding:7px 10px;">G1, G2, G3&ndash;G5, A-tier, M1</td><td style="padding:7px 10px;"><strong>G2 FRD</strong> (FR-&lt;area&gt;-nnn)</td><td style="padding:7px 10px;">Drives EPIC/Feature/Story &rarr; M1 TDDs</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;background:#f6f9ff;"><td style="padding:7px 10px;font-weight:700;">SCR &mdash; Screen / UI</td><td style="padding:7px 10px;">G2, A3, M1</td><td style="padding:7px 10px;"><strong>G2 FRD</strong> + <strong>M1 UI-TDD</strong></td><td style="padding:7px 10px;"><strong>M2 UI-code</strong> (Angular)</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">CMP &mdash; Component / Service</td><td style="padding:7px 10px;">A3, M1</td><td style="padding:7px 10px;"><strong>A3 SDD</strong> + <strong>M1 Service-TDD</strong></td><td style="padding:7px 10px;"><strong>M3 API-code</strong> (Spring Boot)</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;background:#f6f9ff;"><td style="padding:7px 10px;font-weight:700;">ENT &mdash; Data Entity</td><td style="padding:7px 10px;">A3, M1</td><td style="padding:7px 10px;"><strong>A3 SDD</strong> + <strong>M1 Service-TDD</strong></td><td style="padding:7px 10px;">M3 DAO (authoritative = schema-snapshot.json)</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">API &mdash; Integration</td><td style="padding:7px 10px;">A1, A3, M1</td><td style="padding:7px 10px;"><strong>A3 SDD</strong> + <strong>M1 Service-TDD</strong></td><td style="padding:7px 10px;">M3 messaging / integration</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;background:#f6f9ff;"><td style="padding:7px 10px;font-weight:700;">WF &mdash; Workflow / State Machine</td><td style="padding:7px 10px;">G2, A3, M1</td><td style="padding:7px 10px;"><strong>A3 SDD</strong> + <strong>M1 Service-TDD</strong></td><td style="padding:7px 10px;">M3 async / batch / orchestration</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">BR &mdash; Business Rule</td><td style="padding:7px 10px;">G1, G2, M1 (M4 via business-rules.md)</td><td style="padding:7px 10px;"><strong>G1 PRD</strong> + 100% map-reduce</td><td style="padding:7px 10px;">Service business logic + M4 OPA</td></tr>
+    </tbody>
+  </table>
+  <div style="margin-top:12px;font-size:11.5px;color:#5c6480;line-height:1.6;">
+    <strong>Chains:</strong> UI &mdash; SCR &rarr; G2 FRD + M1 UI-TDD &rarr; M2 Angular. &nbsp; API &mdash; CMP/ENT/API/WF &rarr; A3 SDD + M1 Service-TDD &rarr; M3 Spring Boot (+ schema-snapshot.json).
+  </div>
+  <div style="margin-top:8px;background:#fff0f0;border-left:4px solid #c0302a;border-radius:6px;padding:8px 13px;font-size:11.5px;color:#c0302a;">
+    <strong>Completeness:</strong> injection is relevance-gated <strong>top-K</strong> for the six non-BR types (not exhaustive). Only <strong>BR</strong> gets 100% coverage (map-reduce at PRD). Well-scoped cards + good per-stage retrieval_queries decide what surfaces. Requires the CardStore to exist (run <code style="background:#fde8e8;padding:1px 4px;border-radius:3px;">re-kb-build</code>).
+  </div>
+</div>
+
+<!-- ===== re-kb-build: invocation & placement (verified) ===== -->
+<div style="max-width:1100px;margin:28px auto;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:20px 24px;font-family:'Segoe UI',Arial,sans-serif;">
+  <div style="font-size:18px;font-weight:800;color:#1a2a4a;margin-bottom:4px;">How &amp; where the cards are created &mdash; <code style="background:#eef2ff;padding:1px 5px;border-radius:3px;">re-kb-build</code> invocation</div>
+  <div style="font-size:12.5px;color:#5c6480;line-height:1.6;margin-bottom:12px;">
+    The <strong>SCR/CMP/ENT/API/WF/BR/FR</strong> cards are created by the <strong>AIDLC-kb:kb-build</strong> agent inside the <strong>re-kb-build</strong> pipeline &mdash; <em>not</em> by the forward SDLC agents (those only consume them).
+  </div>
+
+  <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px;">
+    <thead><tr style="background:#1e2340;color:#fff;text-align:left;"><th style="padding:8px 10px;">Aspect</th><th style="padding:8px 10px;">Value (verified)</th></tr></thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">Workspace tier</td><td style="padding:7px 10px;"><strong>Global</strong> &mdash; <code>tier: global</code>, runs ONCE per application (not per-EPIC/mini)</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;background:#f6f9ff;"><td style="padding:7px 10px;font-weight:700;">Execution runner</td><td style="padding:7px 10px;"><strong>Server-side</strong> (Bedrock worker / API process) &mdash; the <code>kb-build</code> stage has <strong>no <code>required_runner</code></strong>. Contrast: Architecture A1&ndash;A4 and Mini M1 are <code>required_runner: cli</code> (local laptop).</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">What it does</td><td style="padding:7px 10px;">Reads corpus &rarr; LLM synthesises typed cards (cite-or-abstain, evidence locus required) &rarr; writes <code>knowledge/&lt;kind&gt;/&lt;ID&gt;.md</code> + <code>graph.json</code> + <code>evidence-map.jsonl</code> + <code>cards.jsonl</code> &rarr; <code>kb-check</code> gate &rarr; publish to CardStore</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;background:#f6f9ff;"><td style="padding:7px 10px;font-weight:700;">CardStore location</td><td style="padding:7px 10px;"><strong>Local disk</strong> <code>kb_root_for</code> = <code>workspaces/&lt;app&gt;/kb/</code> (or <code>FE_KB_ROOT</code>). Also persisted to <strong>S3</strong> as the <code>kb</code> artifact when <code>FE_ARTIFACT_STORE=s3</code> &mdash; but agents read the <em>local</em> path, not S3.</td></tr>
+    </tbody>
+  </table>
+
+  <div style="background:#fff8e8;border-left:4px solid #d08a00;border-radius:6px;padding:9px 13px;font-size:12px;color:#7a4000;margin-bottom:12px;">
+    <strong>Distributed implication:</strong> because <code>re-kb-build</code> runs <strong>server-side</strong> but the Architecture/UI/API design stages run on the <strong>local CLI</strong>, a distributed deployment must bridge the CardStore &mdash; via a <strong>shared <code>FE_KB_ROOT</code></strong> (EFS/NFS/SMB), an <strong>S3 hydrate step</strong>, or <strong>co-location</strong>. Single-host deployments work out of the box (same <code>kb_root_for</code>).
+  </div>
+
+  <div style="font-size:11.5px;color:#5c6480;line-height:1.7;">
+    <strong>Locations:</strong>
+    pipeline &rarr; <code>app/agentic_platform/pipelines/re-kb-build.yaml</code> (agents repo) &nbsp;|&nbsp;
+    skill &rarr; <code>plugins/lib/uw/aidlc-kb/skills/kb-build/SKILL.md</code> &nbsp;|&nbsp;
+    orchestrator &rarr; <code>plugins/lib/uw/aidlc-kb/agents/kb-orchestrator.md</code> &nbsp;|&nbsp;
+    gate &rarr; <code>plugins/lib/uw/aidlc-kb/skills/kb-check/</code> &nbsp;|&nbsp;
+    runtime &rarr; <code>worker/stage_executor.py</code> (<code>_materialise_corpus</code> / <code>_kb_gate</code> / <code>_publish_kb</code>)
+  </div>
+</div>
+
+<!-- ===== Execution Runner by Stage (verified) ===== -->
+<div style="max-width:1100px;margin:28px auto;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:20px 24px;font-family:'Segoe UI',Arial,sans-serif;">
+  <div style="font-size:18px;font-weight:800;color:#1a2a4a;margin-bottom:4px;">Execution Runner by Stage <span style="font-size:12px;font-weight:600;color:#1a6b3a;">(verified from pipeline YAMLs: required_runner)</span></div>
+  <div style="font-size:12.5px;color:#5c6480;line-height:1.6;margin-bottom:12px;">
+    Stages with <code style="background:#eef2ff;padding:1px 4px;border-radius:3px;">required_runner: cli</code> run on the <strong>local laptop</strong> (Claude Code CLI). Stages with <strong>no</strong> <code style="background:#eef2ff;padding:1px 4px;border-radius:3px;">required_runner</code> run <strong>server-side</strong> (Bedrock worker / API process).
+  </div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <thead><tr style="background:#1e2340;color:#fff;text-align:left;">
+      <th style="padding:8px 10px;">Workspace</th><th style="padding:8px 10px;">Stages</th><th style="padding:8px 10px;">required_runner</th><th style="padding:8px 10px;">Runs where</th>
+    </tr></thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #edf1f7;background:#eef5ff;"><td style="padding:7px 10px;font-weight:700;">KB Build</td><td style="padding:7px 10px;">re-kb-build / kb-build</td><td style="padding:7px 10px;"><em>(absent)</em></td><td style="padding:7px 10px;color:#1a4a7a;font-weight:700;">Server-side (Bedrock worker)</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;background:#eef5ff;"><td style="padding:7px 10px;font-weight:700;">Global</td><td style="padding:7px 10px;">G1 PRD, G2 FRD, G3 EPIC, G4 Feature, G5 User Story, G6 Coverage</td><td style="padding:7px 10px;"><em>(absent)</em></td><td style="padding:7px 10px;color:#1a4a7a;font-weight:700;">Server-side (Bedrock worker)</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">Architecture</td><td style="padding:7px 10px;">A1 ADR, A2 NFR, A3 SDD, A4 SRD</td><td style="padding:7px 10px;"><code>cli</code></td><td style="padding:7px 10px;color:#1a6b3a;font-weight:700;">Local &mdash; Claude Code CLI</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">Mini (per EPIC)</td><td style="padding:7px 10px;">M1 LLD/TDDs, M2 UI-code, M3 API-code, M4 Security-OPA, M5 API-test, M6 UI-smoke</td><td style="padding:7px 10px;"><code>cli</code></td><td style="padding:7px 10px;color:#1a6b3a;font-weight:700;">Local &mdash; Claude Code CLI</td></tr>
+      <tr style="border-bottom:1px solid #edf1f7;"><td style="padding:7px 10px;font-weight:700;">Epic Assembler</td><td style="padding:7px 10px;">EA1 Assemble, EA2 DB-wiring, EA3 Local-deploy, EA4 UI-smoke, EA5 UI-e2e, EA6 PR-merge</td><td style="padding:7px 10px;"><code>cli</code></td><td style="padding:7px 10px;color:#1a6b3a;font-weight:700;">Local &mdash; Claude Code CLI</td></tr>
+    </tbody>
+  </table>
+  <div style="margin-top:12px;background:#fff8e8;border-left:4px solid #d08a00;border-radius:6px;padding:9px 13px;font-size:12px;color:#7a4000;">
+    <strong>CardStore implication:</strong> <code>re-kb-build</code> and the <strong>Global</strong> stages (incl. <strong>G1 PRD</strong>) are <strong>server-side</strong> &mdash; they share the <em>server&rsquo;s</em> <code>kb_root_for</code>, so PRD sees the freshly built cards automatically. But <strong>Architecture (A1&ndash;A4)</strong> and <strong>Mini (M1 TDDs)</strong> run on the <strong>local CLI</strong> &mdash; they read the <em>laptop&rsquo;s</em> <code>kb_root_for</code>. In a distributed deployment those hosts differ, so the server-built cards must be bridged to the laptop via a <strong>shared <code>FE_KB_ROOT</code></strong>, an <strong>S3 hydrate step</strong>, or <strong>co-location</strong> (single-host works out of the box).
+  </div>
+</div>
+</body>
+</html>
